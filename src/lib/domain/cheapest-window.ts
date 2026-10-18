@@ -1,3 +1,5 @@
+import type { Price } from "../prices/schema";
+
 export type PriceWindow = {
   startIndex: number;
   length: number;

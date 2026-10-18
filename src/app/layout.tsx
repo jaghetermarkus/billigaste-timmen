@@ -37,17 +37,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         inter.variable,
       )}
     >
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <header className="flex justify-end p-4">
-          <ThemeToggle />
-        </header>
-      </ThemeProvider>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <header className="relative z-10 flex justify-end p-4">
+            <ThemeToggle />
+          </header>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

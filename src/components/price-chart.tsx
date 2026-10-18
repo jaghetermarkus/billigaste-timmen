@@ -73,7 +73,8 @@ export function PriceChart({
               i === selected
                 ? "fill-primary"
                 : inHighlight(i)
-                  ? "fill-emerald-500"
+                  ? // ? "fill-emerald-500"
+                    "fill-(--mood-accent)"
                   : "fill-muted-foreground/40"
             }
           />

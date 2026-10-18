@@ -128,3 +128,39 @@
     @apply font-sans;
   }
 }
+
+:root {
+  --base: #eef0f3;
+  --cool: rgba(150, 182, 226, 0.4);
+  --mood-accent: #8a5d00;
+  --mood-glow: rgba(240, 196, 90, 0.48);
+}
+.dark {
+  --base: #06080b;
+  --cool: rgba(36, 66, 110, 0.38);
+  --mood-accent: #f2c85b;
+  --mood-glow: rgba(222, 172, 52, 0.36);
+}
+[data-mood="billig"] {
+  --mood-accent: #0a7a56;
+  --mood-glow: rgba(70, 210, 160, 0.42);
+}
+.dark [data-mood="billig"] {
+  --mood-accent: #62e6b4;
+  --mood-glow: rgba(40, 196, 146, 0.42);
+}
+[data-mood="dyr"] {
+  --mood-accent: #b8382a;
+  --mood-glow: rgba(255, 130, 120, 0.42);
+}
+.dark [data-mood="dyr"] {
+  --mood-accent: #ff8b7b;
+  --mood-glow: rgba(236, 80, 80, 0.4);
+}
+
+.mood-bg {
+  background:
+    radial-gradient(110% 65% at 90% 108%, var(--mood-glow) 0%, transparent 62%),
+    radial-gradient(90% 55% at 0% 0%, var(--cool) 0%, transparent 60%),
+    var(--base);
+}
