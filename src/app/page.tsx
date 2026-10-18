@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { TZDate } from "@date-fns/tz";
 import { connection } from "next/server";
 import { format } from "date-fns";
+import { PriceChart } from "@/components/price-chart";
 
 export default function Home() {
   return (
@@ -48,6 +49,7 @@ export default function Home() {
             </dd>
           </div>
         </dl>
+        <PriceChart prices={prices} />
         <ul className="font-mono text-sm">
           {prices.map((price) => (
             <li key={price.time_start}>
