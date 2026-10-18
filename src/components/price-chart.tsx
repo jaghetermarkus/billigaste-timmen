@@ -6,8 +6,19 @@ import type { Price } from "@/lib/prices/schema";
 const WIDTH = 960;
 const HEIGHT = 200;
 
-export function PriceChart({ prices }: { prices: Price[] }) {
+export function PriceChart({
+  prices,
+  highlight,
+}: {
+  prices: Price[];
+  highlight?: { startIndex: number; length: number } | null;
+}) {
   const [selected, setSelected] = useState<number | null>(null);
+
+  const inHighlight = (i: number) =>
+    highlight != null &&
+    i >= highlight.startIndex &&
+    i < highlight.startIndex + highlight.length;
 
   const values = prices.map((p) => p.SEK_per_kWh);
   const top = Math.max(...values, 0);
@@ -59,7 +70,11 @@ export function PriceChart({ prices }: { prices: Price[] }) {
             width={barWidth * 0.7}
             height={Math.max(1, Math.abs(y(p.SEK_per_kWh) - y(0)))}
             className={
-              i === selected ? "fill-primary" : "fill-muted-foreground/40"
+              i === selected
+                ? "fill-primary"
+                : inHighlight(i)
+                  ? "fill-emerald-500"
+                  : "fill-muted-foreground/40"
             }
           />
         ))}

@@ -5,6 +5,7 @@ import { TZDate } from "@date-fns/tz";
 import { connection } from "next/server";
 import { format } from "date-fns";
 import { PriceChart } from "@/components/price-chart";
+import { findCheapestWindow } from "@/lib/domain/cheapest-window";
 
 export default function Home() {
   return (
@@ -25,6 +26,7 @@ export default function Home() {
     const prices = await fetchPrices(today);
     const stats = getDayStats(prices);
     const ore = (sek: number) => ` ${(sek * 100).toFixed(1)} öre`;
+    const cheapest = findCheapestWindow(prices, 4);
 
     return (
       <div className="mt-4">
@@ -49,7 +51,27 @@ export default function Home() {
             </dd>
           </div>
         </dl>
-        <PriceChart prices={prices} />
+        {cheapest && (
+          <p className="mt-4">
+            Billigaste timmen: kl{" "}
+            {prices[cheapest.startIndex].time_start.slice(11, 16)} -{" "}
+            {prices[cheapest.startIndex + cheapest.length - 1].time_end.slice(
+              11,
+              16,
+            )}{" "}
+            snitt {ore(cheapest.averagePrice)}
+          </p>
+        )}
+        {cheapest && (
+          <PriceChart
+            prices={prices}
+            highlight={{
+              startIndex: cheapest.startIndex,
+              length: cheapest.length,
+            }}
+          />
+        )}
+
         <ul className="font-mono text-sm">
           {prices.map((price) => (
             <li key={price.time_start}>
