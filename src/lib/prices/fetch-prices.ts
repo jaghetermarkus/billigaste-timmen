@@ -1,11 +1,12 @@
-import { TZDate } from "@date-fns/tz";
-import { format } from "date-fns";
+import { cacheLife } from "next/cache";
 import { pricesSchema, type Prices } from "./schema";
 
-export async function fetchPrices(date: Date, area = "SE4"): Promise<Prices> {
-  const day = new TZDate(date, "Europe/Stockholm");
-  const url = `https://www.elprisetjustnu.se/api/v1/prices/${format(day, "yyyy/MM-dd")}_${area}.json`;
-  const res = await fetch(url, { next: { revalidate: 900 } });
+export async function fetchPrices(date: string, area = "SE4"): Promise<Prices> {
+  "use cache";
+  cacheLife("hours");
+
+  const url = `https://www.elprisetjustnu.se/api/v1/prices/${date}_${area}.json`;
+  const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`Failed to fetch prices (${res.status})`);
   }
