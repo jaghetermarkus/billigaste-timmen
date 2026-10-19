@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { findCheapestWindow } from "./cheapest-window";
 import type { Price } from "../prices/schema";
+import { findCheapestWindow } from "./cheapest-window";
 
 const prices = (values: number[]): Price[] =>
   values.map((sek, i) => ({
