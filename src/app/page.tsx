@@ -12,6 +12,7 @@ import { getMood } from "@/lib/domain/mood";
 import { fetchPrices } from "@/lib/prices/fetch-prices";
 import { fetchReferenceAverage } from "@/lib/prices/fetch-reference-average";
 import type { Price } from "@/lib/prices/schema";
+import { MoodLine } from "@/components/mood-line";
 
 type SearchParams = Promise<{ dag?: string }>;
 
@@ -22,7 +23,7 @@ const dateOf = (p: Price) => p.time_start.slice(0, 10);
 
 export default function Home({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <main className="p-6">
+    <main className="mx-auto max-w-md px-5 pb-24 pt-2">
       <Suspense fallback={<p>Hämtar priser…</p>}>
         <DayPrices searchParams={searchParams} />
       </Suspense>
@@ -65,7 +66,8 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
     ? prices.filter((p) => dateOf(p) === todayIso)
     : prices;
   const reference = await fetchReferenceAverage(format(now, "yyyy/MM-dd"));
-  const mood = getMood(getDayStats(moodPrices).average, reference);
+  const moodAverage = getDayStats(moodPrices).average;
+  const mood = getMood(moodAverage, reference);
 
   // Med två dagar letar vi bara bland kvartar som inte har passerat
   const first = multiDay
@@ -85,43 +87,60 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
       <div className="mood-bg fixed inset-0 z-0" aria-hidden="true" />
 
       <div className="relative z-10">
-        <DayTabs day={day} />
+        <div className="flex items-center justify-between">
+          <span className="glass rounded-full px-3 py-1.5 text-[13px] font-semibold tracking-wide">
+            SE4
+          </span>
+          <DayTabs day={day} />
+        </div>
+      </div>
 
+      {reference !== null && (
+        <MoodLine
+          mood={mood}
+          dayAverage={moodAverage}
+          referenceAverage={reference}
+        />
+      )}
+
+      <div className="relative z-10">
         {day !== "imorgon" && (
           <div className="mt-6">
             <CurrentPrice prices={prices} />
           </div>
         )}
+      </div>
 
-        <dl className="mt-6 grid grid-cols-3 gap-4">
-          <div>
-            <dt>Lägst</dt>
-            <dd>
-              {ore(stats.min.SEK_per_kWh)} {when(stats.min)}
-            </dd>
-          </div>
-          <div>
-            <dt>Snitt</dt>
-            <dd>{ore(stats.average)}</dd>
-          </div>
-          <div>
-            <dt>Högst</dt>
-            <dd>
-              {ore(stats.max.SEK_per_kWh)} {when(stats.max)}
-            </dd>
-          </div>
-        </dl>
+      <dl className="glass mt-6 grid grid-cols-3 gap-4 rounded-[18px] p-4">
+        <div>
+          <dt>Lägst</dt>
+          <dd>
+            {ore(stats.min.SEK_per_kWh)} {when(stats.min)}
+          </dd>
+        </div>
+        <div>
+          <dt>Snitt</dt>
+          <dd>{ore(stats.average)}</dd>
+        </div>
+        <div>
+          <dt>Högst</dt>
+          <dd>
+            {ore(stats.max.SEK_per_kWh)} {when(stats.max)}
+          </dd>
+        </div>
+      </dl>
+
+      <section className="glass mt-6 rounded-[22px] p-3.5">
+        <PriceChart prices={prices} highlight={cheapest} dayNames={dayNames} />
 
         {cheapest && (
-          <p className="mt-6">
+          <p className="mt-4">
             Billigaste timmen: {when(prices[cheapest.startIndex])}–
             {endTimeOf(prices[cheapest.startIndex + cheapest.length - 1])},
             snitt {ore(cheapest.average)}
           </p>
         )}
-
-        <PriceChart prices={prices} highlight={cheapest} dayNames={dayNames} />
-      </div>
+      </section>
     </div>
   );
 }
