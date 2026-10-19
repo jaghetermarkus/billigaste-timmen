@@ -78,14 +78,14 @@ export default function Home() {
             />
           )}
 
-          <ul className="font-mono text-sm">
+          {/* <ul className="font-mono text-sm">
             {prices.map((price) => (
               <li key={price.time_start}>
                 {price.time_start.slice(11, 16)} -{" "}
                 {(price.SEK_per_kWh * 100).toFixed(1)} öre/kWh
               </li>
             ))}
-          </ul>
+          </ul> */}
         </div>
       </div>
     );
