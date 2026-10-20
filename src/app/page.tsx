@@ -89,6 +89,12 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
         ? `Billigaste timmen ${(dayNames[dateOf(prices[cheapest.startIndex])] ?? "").toLowerCase()}`
         : "Dagens billigaste timme";
 
+  const statItems = [
+    { label: "Lägst", value: stats.min.SEK_per_kWh, sub: when(stats.min) },
+    { label: "Snitt", value: stats.average, sub: "öre/kWh" },
+    { label: "Högst", value: stats.max.SEK_per_kWh, sub: when(stats.max) },
+  ];
+
   return (
     <div data-mood={mood}>
       <div className="mood-bg fixed inset-0 z-0" aria-hidden="true" />
@@ -140,23 +146,21 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
         )}
       </section>
 
-      <dl className="glass mt-6 grid grid-cols-3 gap-4 rounded-[18px] p-4">
-        <div>
-          <dt>Lägst</dt>
-          <dd>
-            {ore(stats.min.SEK_per_kWh)} {when(stats.min)}
-          </dd>
-        </div>
-        <div>
-          <dt>Snitt</dt>
-          <dd>{ore(stats.average)}</dd>
-        </div>
-        <div>
-          <dt>Högst</dt>
-          <dd>
-            {ore(stats.max.SEK_per_kWh)} {when(stats.max)}
-          </dd>
-        </div>
+      <dl className="glass mt-3 grid grid-cols-3 rounded-[18px]">
+        {statItems.map((s) => (
+          <div
+            key={s.label}
+            className="flex flex-col gap-0.5 border-l border-foreground/10 px-3.5 py-3 first:border-l-0"
+          >
+            <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              {s.label}
+            </dt>
+            <dd className="text-[22px] font-light tabular-nums">
+              {(s.value * 100).toFixed(1)}
+            </dd>
+            <dd className="text-[11px] text-muted-foreground">{s.sub}</dd>
+          </div>
+        ))}
       </dl>
     </div>
   );
