@@ -1,13 +1,13 @@
 "use client";
 
-import { useId, useRef } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ChevronDown } from "lucide-react";
 import { areaCities, areas, type Area } from "@/lib/domain/area";
 import { moodLabels } from "@/lib/domain/mood";
 import type { AreaOverview } from "@/lib/prices/fetch-area-overview";
+import { ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { hrefFor, type Day } from "./day-tabs";
+import { useId, useRef, useState, useTransition } from "react";
+import Link, { useLinkStatus } from "next/link";
 
 // Förenklad Sverigekarta från designen (viewBox 0 0 200 432)
 const SWEDEN =
@@ -37,7 +37,14 @@ export function AreaPicker({ area, day, overview }: Props) {
 
   const open = () => dialogRef.current?.showModal();
   const close = () => dialogRef.current?.close();
-  const pick = (a: Area) => router.push(hrefFor(day, a), { scroll: false });
+  const [isPending, startTransition] = useTransition();
+  const [pendingArea, setPendingArea] = useState<Area | null>(null);
+
+  const pick = (a: Area) => {
+    setPendingArea(a);
+    startTransition(() => router.push(hrefFor(day, a), { scroll: false }));
+  };
+  const loadingArea = isPending ? pendingArea : null;
 
   return (
     <>
@@ -45,7 +52,7 @@ export function AreaPicker({ area, day, overview }: Props) {
         type="button"
         onClick={open}
         aria-haspopup="dialog"
-        className="glass flex items-center gap-1.5 rounded-full py-1.5 pr-2.5 pl-3 text-[13px] font-semibold"
+        className="glass flex items-center gap-1.5 rounded-full py-1.5 pr-2.5 pl-3 text-[13px] font-semibold transition-transform duration-100 active:scale-95"
       >
         {area}
         <ChevronDown
@@ -62,10 +69,7 @@ export function AreaPicker({ area, day, overview }: Props) {
         className="mx-auto mt-auto mb-0 w-full max-w-md rounded-t-[28px] border-t border-foreground/10 bg-background text-foreground backdrop:bg-black/50"
       >
         <div className="flex flex-col gap-4 px-5 pt-2.5 pb-8">
-          <span
-            aria-hidden="true"
-            className="mx-auto h-1.5 w-10 rounded-full bg-foreground/15"
-          />
+          <MoodDot />
 
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -79,7 +83,7 @@ export function AreaPicker({ area, day, overview }: Props) {
             <button
               type="button"
               onClick={close}
-              className="rounded-full bg-foreground/10 px-3.5 py-2 text-sm font-semibold"
+              className="rounded-full bg-foreground/10 px-3.5 py-2 text-sm font-semibold transition-transform duration-100 active:scale-95"
             >
               Klar
             </button>
@@ -116,8 +120,10 @@ export function AreaPicker({ area, day, overview }: Props) {
                     clipPath={`url(#${id}-${o.area})`}
                     onClick={() => pick(o.area)}
                     className={`cursor-pointer fill-(--mood-accent) transition-opacity hover:opacity-60 ${
-                      o.area === area ? "opacity-75" : "opacity-20"
-                    }`}
+                      o.area === area || o.area === loadingArea
+                        ? "opacity-75"
+                        : "opacity-20"
+                    } ${o.area === loadingArea ? "animate-pulse" : ""}`}
                   />
                 ))}
                 <path
@@ -174,16 +180,13 @@ export function AreaPicker({ area, day, overview }: Props) {
                       href={hrefFor(day, o.area)}
                       scroll={false}
                       aria-current={selected ? "true" : undefined}
-                      className={`flex min-h-14 items-center gap-2.5 rounded-[14px] px-3 py-2 ${
+                      className={`transition-transform duration-100 active:scale-[0.98] flex min-h-14 items-center gap-2.5 rounded-[14px] px-3 py-2 ${
                         selected
                           ? "border border-(--mood-accent) bg-foreground/10"
                           : "glass"
                       }`}
                     >
-                      <span
-                        aria-hidden="true"
-                        className="size-2 shrink-0 rounded-full bg-(--mood-accent) shadow-[0_0_8px_var(--mood-accent)]"
-                      />
+                      <MoodDot />
                       <span className="flex min-w-0 flex-1 flex-col">
                         <span className="text-sm font-bold">
                           {o.area}{" "}
@@ -212,5 +215,18 @@ export function AreaPicker({ area, day, overview }: Props) {
         </div>
       </dialog>
     </>
+  );
+}
+
+/** Stämningspricken i en rad. Pulserar medan raden laddar. */
+function MoodDot() {
+  const { pending } = useLinkStatus();
+  return (
+    <span
+      aria-hidden="true"
+      className={`size-2 shrink-0 rounded-full bg-(--mood-accent) shadow-[0_0_8px_var(--mood-accent)] ${
+        pending ? "animate-ping" : ""
+      }`}
+    />
   );
 }
