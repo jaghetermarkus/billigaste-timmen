@@ -1,7 +1,4 @@
-import type { getMood } from "@/lib/domain/mood";
 import { moodLabels, type Mood } from "@/lib/domain/mood";
-
-type Mood = ReturnType<typeof getMood>;
 
 type Props = {
   mood: Mood;
