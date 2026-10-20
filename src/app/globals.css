@@ -135,20 +135,16 @@
 :root {
   --base: #eef0f3;
   --cool: rgba(150, 182, 226, 0.4);
-  --mood-accent: #8a5d00;
-  --mood-glow: rgba(240, 196, 90, 0.48);
   --glass: rgba(255, 255, 255, 0.62);
   --glass-line: rgba(18, 21, 26, 0.08);
 }
 .dark {
   --base: #06080b;
   --cool: rgba(36, 66, 110, 0.38);
-  --mood-accent: #f2c85b;
-  --mood-glow: rgba(222, 172, 52, 0.36);
   --glass: rgba(255, 255, 255, 0.05);
   --glass-line: rgba(255, 255, 255, 0.09);
 }
-[data-mood="billig"] {
+/* [data-mood="billig"] {
   --mood-accent: #0a7a56;
   --mood-glow: rgba(70, 210, 160, 0.42);
 }
@@ -169,17 +165,73 @@
 }
 .dark [data-mood="vanlig"] {
   --mood-accent: #f2c85b;
-}
-
-.mood-bg {
-  background:
-    radial-gradient(110% 65% at 90% 108%, var(--mood-glow) 0%, transparent 62%),
-    radial-gradient(90% 55% at 0% 0%, var(--cool) 0%, transparent 60%),
-    var(--base);
-}
+} */
 
 @utility glass {
   background: var(--glass);
   border: 1px solid var(--glass-line);
   backdrop-filter: blur(20px);
+}
+
+/* ---------- Stämning ---------- */
+
+/* Grundfärger för bakgrunden */
+:root {
+  --base: #eef0f3;
+  --cool: rgba(150, 182, 226, 0.4);
+}
+.dark {
+  --base: #06080b;
+  --cool: rgba(36, 66, 110, 0.38);
+}
+
+/*
+  Stämningsfärger, ljust tema.
+  [data-mood=...]                 → ett enskilt element, t.ex. en rad i områdesväljaren
+  :root:has([data-page-mood=...]) → hela sidan, styrt av page.tsx
+*/
+:root,
+[data-mood="vanlig"],
+:root:has([data-page-mood="vanlig"]) {
+  --mood-accent: #8a5d00;
+  --mood-glow: rgba(240, 196, 90, 0.48);
+}
+[data-mood="billig"],
+:root:has([data-page-mood="billig"]) {
+  --mood-accent: #0a7a56;
+  --mood-glow: rgba(70, 210, 160, 0.42);
+}
+[data-mood="dyr"],
+:root:has([data-page-mood="dyr"]) {
+  --mood-accent: #b8382a;
+  --mood-glow: rgba(255, 130, 120, 0.42);
+}
+
+/* Stämningsfärger, mörkt tema */
+.dark,
+.dark [data-mood="vanlig"],
+.dark:has([data-page-mood="vanlig"]) {
+  --mood-accent: #f2c85b;
+  --mood-glow: rgba(222, 172, 52, 0.36);
+}
+.dark [data-mood="billig"],
+.dark:has([data-page-mood="billig"]) {
+  --mood-accent: #62e6b4;
+  --mood-glow: rgba(40, 196, 146, 0.42);
+}
+.dark [data-mood="dyr"],
+.dark:has([data-page-mood="dyr"]) {
+  --mood-accent: #ff8b7b;
+  --mood-glow: rgba(236, 80, 80, 0.4);
+}
+
+/* Skimret ligger på html och täcker därmed hela sidan */
+html {
+  min-height: 100lvh;
+  background:
+    linear-gradient(to bottom, transparent calc(100% - 5rem), var(--base)),
+    radial-gradient(110% 65% at 90% 100%, var(--mood-glow) 0%, transparent 62%),
+    radial-gradient(90% 55% at 0% 0%, var(--cool) 0%, transparent 60%),
+    var(--base);
+  background-repeat: no-repeat;
 }

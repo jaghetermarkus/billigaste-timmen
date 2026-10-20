@@ -1,7 +1,7 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
 
@@ -19,20 +19,27 @@ export const metadata: Metadata = {
     "Billigaste timmen är elspotpriser för el i Sverige. Vi visar dig när elen är billigast och dyrast.",
 };
 
+export const viewport: Viewport = {
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#eef0f3" },
+    { media: "(prefers-color-scheme: dark)", color: "#06080b" },
+  ],
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="sv"
       suppressHydrationWarning
       className={cn(
-        "h-full",
         "antialiased",
         fraunces.variable,
         "font-sans",
         inter.variable,
       )}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-lvh flex-col bg-transparent">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -43,6 +50,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <ThemeToggle />
           </header>
           {children}
+          <footer className="px-5 pb-8 text-center text-[10px] text-muted-foreground/45">
+            <p>
+              Elpriser tillhandahålls av{" "}
+              <a
+                href="https://www.elprisetjustnu.se"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-muted-foreground/30 underline-offset-2 hover:text-foreground"
+              >
+                Elpriset just nu.se
+              </a>
+              . Spotpris exkl. moms och avgifter.
+            </p>
+          </footer>
         </ThemeProvider>
       </body>
     </html>

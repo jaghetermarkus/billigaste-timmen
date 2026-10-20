@@ -111,9 +111,7 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
   ];
 
   return (
-    <div data-mood={mood}>
-      <div className="mood-bg fixed inset-0 z-0" aria-hidden="true" />
-
+    <div data-mood={mood} data-page-mood={mood}>
       <div className="relative z-10">
         <div className="flex items-center justify-between">
           {/* <span className="glass rounded-full px-3 py-1.5 text-[13px] font-semibold tracking-wide">
