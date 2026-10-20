@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { defaultArea, type Area } from "@/lib/domain/area";
+import { TabLabel } from "./tab-label";
 
 export type Day = "idag" | "imorgon" | "2dagar";
 
@@ -37,8 +38,6 @@ export function DayTabs({
     >
       {tabs.map((tab) => {
         const active = day === tab.id;
-        const base =
-          "rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors";
 
         if (tab.id === "imorgon" && !tomorrowAvailable && !active) {
           return (
@@ -46,7 +45,7 @@ export function DayTabs({
               key={tab.id}
               aria-disabled="true"
               title="Morgondagens priser kommer runt 13:00"
-              className={`${base} cursor-not-allowed text-muted-foreground opacity-40`}
+              className="cursor-not-allowed rounded-full px-3.5 py-1.5 text-[13px] font-medium text-muted-foreground opacity-40"
             >
               {tab.label}
             </span>
@@ -58,13 +57,9 @@ export function DayTabs({
             key={tab.id}
             href={hrefFor(tab.id, area)}
             aria-current={active ? "page" : undefined}
-            className={`${base} ${
-              active
-                ? "bg-foreground/10 text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+            className="group rounded-full text-[13px] font-medium transition-transform duration-100 active:scale-95"
           >
-            {tab.label}
+            <TabLabel active={active}>{tab.label}</TabLabel>
           </Link>
         );
       })}
