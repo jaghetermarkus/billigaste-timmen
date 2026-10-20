@@ -7,7 +7,7 @@ export async function fetchReferenceAverage(
   today: string,
   area: Area,
 ): Promise<number | null> {
-  "use cache";
+  "use cache: remote";
   cacheLife("days");
 
   const base = parse(today, "yyyy/MM-dd", new Date());

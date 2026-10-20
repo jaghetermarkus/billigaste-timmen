@@ -6,7 +6,7 @@ export async function fetchPrices(
   date: string,
   area: Area = "SE4",
 ): Promise<Prices> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
 
   const url = `https://www.elprisetjustnu.se/api/v1/prices/${date}_${area}.json`;
