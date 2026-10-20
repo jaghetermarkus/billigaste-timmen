@@ -82,6 +82,13 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
       ? `${(dayNames[dateOf(p)] ?? dateOf(p)).toLowerCase()} kl ${timeOf(p)}`
       : `kl ${timeOf(p)}`;
 
+  const cheapestLabel =
+    day === "imorgon"
+      ? "Morgondagens billigaste timme"
+      : multiDay && cheapest
+        ? `Billigaste timmen ${(dayNames[dateOf(prices[cheapest.startIndex])] ?? "").toLowerCase()}`
+        : "Dagens billigaste timme";
+
   return (
     <div data-mood={mood}>
       <div className="mood-bg fixed inset-0 z-0" aria-hidden="true" />
@@ -105,11 +112,33 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
 
       <div className="relative z-10">
         {day !== "imorgon" && (
-          <div className="mt-6">
-            <CurrentPrice prices={prices} />
+          <div className="mt-8">
+            <CurrentPrice
+              prices={prices}
+              min={stats.min.SEK_per_kWh}
+              max={stats.max.SEK_per_kWh}
+            />
           </div>
         )}
       </div>
+
+      <section className="glass mt-4 rounded-[22px] px-3.5 pt-3.5 pb-3">
+        <PriceChart prices={prices} highlight={cheapest} dayNames={dayNames} />
+
+        {cheapest && (
+          <div className="mt-2 flex items-center gap-2 border-t border-foreground/10 px-0.5 pt-2 text-[13px]">
+            <span
+              aria-hidden="true"
+              className="size-2 rounded-[2px] bg-(--mood-accent) shadow-[0_0_8px_var(--mood-accent)]"
+            />
+            <span className="text-muted-foreground">{cheapestLabel}</span>
+            <span className="ml-auto font-serif text-[17px] font-semibold text-(--mood-accent) tabular-nums">
+              {timeOf(prices[cheapest.startIndex])}–
+              {endTimeOf(prices[cheapest.startIndex + cheapest.length - 1])}
+            </span>
+          </div>
+        )}
+      </section>
 
       <dl className="glass mt-6 grid grid-cols-3 gap-4 rounded-[18px] p-4">
         <div>
@@ -129,18 +158,6 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
           </dd>
         </div>
       </dl>
-
-      <section className="glass mt-6 rounded-[22px] p-3.5">
-        <PriceChart prices={prices} highlight={cheapest} dayNames={dayNames} />
-
-        {cheapest && (
-          <p className="mt-4">
-            Billigaste timmen: {when(prices[cheapest.startIndex])}–
-            {endTimeOf(prices[cheapest.startIndex + cheapest.length - 1])},
-            snitt {ore(cheapest.average)}
-          </p>
-        )}
-      </section>
     </div>
   );
 }
