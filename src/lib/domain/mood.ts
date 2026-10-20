@@ -14,3 +14,9 @@ export function getMood(
   if (ratio > EXPENSIVE_RATIO) return "dyr";
   return "vanlig";
 }
+
+export const moodLabels: Record<Mood, string> = {
+  billig: "Billig dag",
+  vanlig: "Vanlig dag",
+  dyr: "Dyr dag",
+};

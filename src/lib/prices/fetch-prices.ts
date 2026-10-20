@@ -1,7 +1,11 @@
 import { cacheLife } from "next/cache";
 import { pricesSchema, type Prices } from "./schema";
+import { Area } from "@/lib/domain/area";
 
-export async function fetchPrices(date: string, area = "SE4"): Promise<Prices> {
+export async function fetchPrices(
+  date: string,
+  area: Area = "SE4",
+): Promise<Prices> {
   "use cache";
   cacheLife("hours");
 

@@ -2,7 +2,8 @@ import { TZDate } from "@date-fns/tz";
 import { addDays, format, subDays } from "date-fns";
 import { connection } from "next/server";
 import { Suspense } from "react";
-
+import { AreaPicker } from "@/components/area-picker";
+import { fetchAreaOverview } from "@/lib/prices/fetch-area-overview";
 import { CurrentPrice } from "@/components/current-price";
 import { DayTabs, type Day } from "@/components/day-tabs";
 import { MoodLine } from "@/components/mood-line";
@@ -14,8 +15,9 @@ import { fetchPrices } from "@/lib/prices/fetch-prices";
 import { fetchReferenceAverage } from "@/lib/prices/fetch-reference-average";
 import type { Price } from "@/lib/prices/schema";
 import { sv } from "date-fns/locale";
+import { parseArea, type Area } from "@/lib/domain/area";
 
-type SearchParams = Promise<{ dag?: string }>;
+type SearchParams = Promise<{ dag?: string; omrade?: string }>;
 
 const ore = (sek: number) => `${(sek * 100).toFixed(1)} öre`;
 const timeOf = (p: Price) => p.time_start.slice(11, 16);
@@ -33,8 +35,9 @@ export default function Home({ searchParams }: { searchParams: SearchParams }) {
 }
 
 async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
-  const { dag } = await searchParams;
+  const { dag, omrade } = await searchParams;
   const day: Day = dag === "imorgon" || dag === "2dagar" ? dag : "idag";
+  const area: Area = parseArea(omrade);
 
   await connection();
   const now = new TZDate(new Date(), "Europe/Stockholm");
@@ -45,9 +48,10 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
     [format(addDays(now, 1), "yyyy-MM-dd")]: "I morgon",
   };
 
-  const prices = await loadPrices(day, now);
+  const prices = await loadPrices(day, now, area);
   const tomorrowAvailable = await fetchPrices(
     format(addDays(now, 1), "yyyy/MM-dd"),
+    area,
   ).then(
     () => true,
     () => false,
@@ -72,7 +76,11 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
   const moodPrices = multiDay
     ? prices.filter((p) => dateOf(p) === todayIso)
     : prices;
-  const reference = await fetchReferenceAverage(format(now, "yyyy/MM-dd"));
+  const reference = await fetchReferenceAverage(
+    format(now, "yyyy/MM-dd"),
+    area,
+  );
+  const overview = await fetchAreaOverview(now, day === "imorgon");
   const moodAverage = getDayStats(moodPrices).average;
   const mood = getMood(moodAverage, reference);
 
@@ -108,9 +116,10 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
 
       <div className="relative z-10">
         <div className="flex items-center justify-between">
-          <span className="glass rounded-full px-3 py-1.5 text-[13px] font-semibold tracking-wide">
-            SE4
-          </span>
+          {/* <span className="glass rounded-full px-3 py-1.5 text-[13px] font-semibold tracking-wide">
+            {area}
+          </span> */}
+          <AreaPicker area={area} day={day} overview={overview} />
           <DayTabs day={day} tomorrowAvailable={tomorrowAvailable} />
         </div>
 
@@ -179,9 +188,13 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
   );
 }
 
-async function loadPrices(day: Day, now: Date): Promise<Price[] | null> {
+async function loadPrices(
+  day: Day,
+  now: Date,
+  area: Area,
+): Promise<Price[] | null> {
   const get = (date: Date) =>
-    fetchPrices(format(date, "yyyy/MM-dd")).catch(() => null);
+    fetchPrices(format(date, "yyyy/MM-dd"), area).catch(() => null);
 
   if (day === "idag") return get(now);
   if (day === "imorgon") return get(addDays(now, 1));

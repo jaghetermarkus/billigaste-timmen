@@ -164,6 +164,12 @@
   --mood-accent: #ff8b7b;
   --mood-glow: rgba(236, 80, 80, 0.4);
 }
+[data-mood="vanlig"] {
+  --mood-accent: #8a5d00;
+}
+.dark [data-mood="vanlig"] {
+  --mood-accent: #f2c85b;
+}
 
 .mood-bg {
   background:

@@ -1,20 +1,35 @@
 import Link from "next/link";
+import { defaultArea, type Area } from "@/lib/domain/area";
 
 export type Day = "idag" | "imorgon" | "2dagar";
 
 const tabs = [
-  { id: "idag", label: "I dag", href: "/" },
-  { id: "imorgon", label: "I morgon", href: "/?dag=imorgon" },
-  { id: "2dagar", label: "2 dagar", href: "/?dag=2dagar" },
+  { id: "idag", label: "I dag" },
+  { id: "imorgon", label: "I morgon" },
+  { id: "2dagar", label: "2 dagar" },
 ] as const;
+
+/** Bygger t.ex. "/?dag=imorgon&omrade=SE3". Standardvärden utelämnas. */
+export function hrefFor(day: Day, area: Area) {
+  const params = new URLSearchParams();
+  if (day !== "idag") params.set("dag", day);
+  if (area !== defaultArea) params.set("omrade", area);
+  const query = params.toString();
+  return query ? `/?${query}` : "/";
+}
 
 type Props = {
   day: Day;
+  area?: Area;
   /** false före ca 13:00, då morgondagens priser inte är publicerade */
   tomorrowAvailable?: boolean;
 };
 
-export function DayTabs({ day, tomorrowAvailable = true }: Props) {
+export function DayTabs({
+  day,
+  area = defaultArea,
+  tomorrowAvailable = true,
+}: Props) {
   return (
     <nav
       aria-label="Välj dag"
@@ -41,7 +56,7 @@ export function DayTabs({ day, tomorrowAvailable = true }: Props) {
         return (
           <Link
             key={tab.id}
-            href={tab.href}
+            href={hrefFor(tab.id, area)}
             aria-current={active ? "page" : undefined}
             className={`${base} ${
               active

@@ -1,10 +1,11 @@
 import { format, parse, subDays } from "date-fns";
 import { cacheLife } from "next/cache";
 import { fetchPrices } from "./fetch-prices";
+import type { Area } from "../domain/area";
 
 export async function fetchReferenceAverage(
   today: string,
-  area = "SE4",
+  area: Area,
 ): Promise<number | null> {
   "use cache";
   cacheLife("days");

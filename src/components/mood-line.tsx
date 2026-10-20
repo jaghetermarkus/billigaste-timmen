@@ -1,12 +1,7 @@
 import type { getMood } from "@/lib/domain/mood";
+import { moodLabels, type Mood } from "@/lib/domain/mood";
 
 type Mood = ReturnType<typeof getMood>;
-
-const labels: Record<Mood, string> = {
-  billig: "Billig dag",
-  vanlig: "Vanlig dag",
-  dyr: "Dyr dag",
-};
 
 type Props = {
   mood: Mood;
@@ -28,7 +23,7 @@ export function MoodLine({ mood, dayAverage, referenceAverage }: Props) {
           aria-hidden="true"
           className="size-2 rounded-full bg-(--mood-accent) shadow-[0_0_12px_var(--mood-accent)]"
         />
-        {labels[mood]}
+        {moodLabels[mood]}
       </p>
       <p className="mt-1.5 text-sm text-muted-foreground">
         Snitt {(dayAverage * 100).toFixed(1)} öre · {comparison}
