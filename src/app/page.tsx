@@ -5,6 +5,7 @@ import { Suspense } from "react";
 
 import { CurrentPrice } from "@/components/current-price";
 import { DayTabs, type Day } from "@/components/day-tabs";
+import { MoodLine } from "@/components/mood-line";
 import { PriceChart } from "@/components/price-chart";
 import { findCheapestWindow } from "@/lib/domain/cheapest-window";
 import { getDayStats } from "@/lib/domain/day-stats";
@@ -12,7 +13,7 @@ import { getMood } from "@/lib/domain/mood";
 import { fetchPrices } from "@/lib/prices/fetch-prices";
 import { fetchReferenceAverage } from "@/lib/prices/fetch-reference-average";
 import type { Price } from "@/lib/prices/schema";
-import { MoodLine } from "@/components/mood-line";
+import { sv } from "date-fns/locale";
 
 type SearchParams = Promise<{ dag?: string }>;
 
@@ -45,6 +46,12 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
   };
 
   const prices = await loadPrices(day, now);
+  const tomorrowAvailable = await fetchPrices(
+    format(addDays(now, 1), "yyyy/MM-dd"),
+  ).then(
+    () => true,
+    () => false,
+  );
   if (!prices) {
     return (
       <>
@@ -104,19 +111,21 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
           <span className="glass rounded-full px-3 py-1.5 text-[13px] font-semibold tracking-wide">
             SE4
           </span>
-          <DayTabs day={day} />
+          <DayTabs day={day} tomorrowAvailable={tomorrowAvailable} />
         </div>
-      </div>
 
-      {reference !== null && (
-        <MoodLine
-          mood={mood}
-          dayAverage={moodAverage}
-          referenceAverage={reference}
-        />
-      )}
+        {/* <p className="mt-6 text-center text-[13px] text-muted-foreground first-letter:uppercase">
+          {format(now, "EEEE d MMMM", { locale: sv })}
+        </p> */}
 
-      <div className="relative z-10">
+        {reference !== null && (
+          <MoodLine
+            mood={mood}
+            dayAverage={moodAverage}
+            referenceAverage={reference}
+          />
+        )}
+
         {day !== "imorgon" && (
           <div className="mt-8">
             <CurrentPrice
@@ -126,42 +135,46 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
             />
           </div>
         )}
+
+        <section className="glass mt-4 rounded-[22px] px-3.5 pt-3.5 pb-3">
+          <PriceChart
+            prices={prices}
+            highlight={cheapest}
+            dayNames={dayNames}
+          />
+
+          {cheapest && (
+            <div className="mt-2 flex items-center gap-2 border-t border-foreground/10 px-0.5 pt-2 text-[13px]">
+              <span
+                aria-hidden="true"
+                className="size-2 rounded-[2px] bg-(--mood-accent) shadow-[0_0_8px_var(--mood-accent)]"
+              />
+              <span className="text-muted-foreground">{cheapestLabel}</span>
+              <span className="ml-auto font-serif text-[17px] font-semibold text-(--mood-accent) tabular-nums">
+                {timeOf(prices[cheapest.startIndex])}–
+                {endTimeOf(prices[cheapest.startIndex + cheapest.length - 1])}
+              </span>
+            </div>
+          )}
+        </section>
+
+        <dl className="glass mt-3 grid grid-cols-3 rounded-[18px]">
+          {statItems.map((s) => (
+            <div
+              key={s.label}
+              className="flex flex-col gap-0.5 border-l border-foreground/10 px-3.5 py-3 first:border-l-0"
+            >
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                {s.label}
+              </dt>
+              <dd className="text-[22px] font-light tabular-nums">
+                {(s.value * 100).toFixed(1)}
+              </dd>
+              <dd className="text-[11px] text-muted-foreground">{s.sub}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
-
-      <section className="glass mt-4 rounded-[22px] px-3.5 pt-3.5 pb-3">
-        <PriceChart prices={prices} highlight={cheapest} dayNames={dayNames} />
-
-        {cheapest && (
-          <div className="mt-2 flex items-center gap-2 border-t border-foreground/10 px-0.5 pt-2 text-[13px]">
-            <span
-              aria-hidden="true"
-              className="size-2 rounded-[2px] bg-(--mood-accent) shadow-[0_0_8px_var(--mood-accent)]"
-            />
-            <span className="text-muted-foreground">{cheapestLabel}</span>
-            <span className="ml-auto font-serif text-[17px] font-semibold text-(--mood-accent) tabular-nums">
-              {timeOf(prices[cheapest.startIndex])}–
-              {endTimeOf(prices[cheapest.startIndex + cheapest.length - 1])}
-            </span>
-          </div>
-        )}
-      </section>
-
-      <dl className="glass mt-3 grid grid-cols-3 rounded-[18px]">
-        {statItems.map((s) => (
-          <div
-            key={s.label}
-            className="flex flex-col gap-0.5 border-l border-foreground/10 px-3.5 py-3 first:border-l-0"
-          >
-            <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              {s.label}
-            </dt>
-            <dd className="text-[22px] font-light tabular-nums">
-              {(s.value * 100).toFixed(1)}
-            </dd>
-            <dd className="text-[11px] text-muted-foreground">{s.sub}</dd>
-          </div>
-        ))}
-      </dl>
     </div>
   );
 }

@@ -47,10 +47,11 @@ export function PriceChart({ prices, highlight, dayNames = {} }: Props) {
   }));
   const multiDay = days.length > 1;
 
-  // Klockslag under grafen var sjätte timme
+  // Klockslag var sjätte timme, var tolfte med två dagar
+  const tickEvery = multiDay ? 12 : 6;
   const ticks = prices.flatMap((p, i) => {
     const [hour, minute] = timeOf(p).split(":");
-    return i > 0 && minute === "00" && Number(hour) % 6 === 0
+    return i > 0 && minute === "00" && Number(hour) % tickEvery === 0
       ? [{ i, label: hour }]
       : [];
   });
@@ -217,6 +218,7 @@ export function PriceChart({ prices, highlight, dayNames = {} }: Props) {
             y1={0}
             y2={HEIGHT}
             className="stroke-foreground/20"
+            strokeDasharray="2 3"
             vectorEffect="non-scaling-stroke"
           />
         ))}
@@ -258,10 +260,10 @@ export function PriceChart({ prices, highlight, dayNames = {} }: Props) {
       </svg>
 
       <div
-        className="relative h-4 text-[11px] text-muted-foreground tabular-nums"
+        className="relative h-4 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground"
         aria-hidden="true"
       >
-        {!multiDay && <span className="absolute left-0">00</span>}
+        <span className="absolute left-0">00</span>
         {ticks.map((t) => (
           <span
             key={t.i}
@@ -271,7 +273,7 @@ export function PriceChart({ prices, highlight, dayNames = {} }: Props) {
             {t.label}
           </span>
         ))}
-        {!multiDay && <span className="absolute right-0">24</span>}
+        <span className="absolute right-0">24</span>
       </div>
     </figure>
   );
