@@ -70,7 +70,10 @@ export function AreaPicker({ area, day, overview }: Props) {
         className="mx-auto mt-auto mb-0 w-full max-w-md rounded-t-[28px] border-t border-foreground/10 bg-background text-foreground backdrop:bg-black/50"
       >
         <div className="flex flex-col gap-4 px-5 pt-2.5 pb-8">
-          <MoodDot />
+          <span
+            aria-hidden="true"
+            className="mx-auto h-1 w-9 rounded-full bg-foreground/20"
+          />
 
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -78,7 +81,7 @@ export function AreaPicker({ area, day, overview }: Props) {
                 Välj elområde
               </h2>
               <p className="mt-0.5 text-[13px] text-muted-foreground">
-                Området står på din elräkning, oftast SE3 eller SE4.
+                Området står på din elräkning.
               </p>
             </div>
             <button
