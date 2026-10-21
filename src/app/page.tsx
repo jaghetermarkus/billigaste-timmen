@@ -26,7 +26,7 @@ const dateOf = (p: Price) => p.time_start.slice(0, 10);
 
 export default function Home({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <main className="mx-auto max-w-md px-5 pb-24 pt-2">
+    <main className="mx-auto w-full max-w-md px-5 pb-24 pt-2">
       <Suspense fallback={<p>Hämtar priser…</p>}>
         <DayPrices searchParams={searchParams} />
       </Suspense>
