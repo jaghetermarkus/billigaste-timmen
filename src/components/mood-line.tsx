@@ -14,8 +14,8 @@ export function MoodLine({ mood, dayAverage, referenceAverage }: Props) {
       : `${Math.abs(diff)} % ${diff < 0 ? "under" : "över"} snittet`;
 
   return (
-    <div className="mt-8 flex flex-col items-center text-center">
-      <p className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-[0.34em] text-(--mood-accent)">
+    <div className="mt-8 flex flex-col items-center text-center lg:items-start lg:text-left lg:justify-start">
+      <p className="flex items-center lg:items-start lg:text-left lg:justify-start gap-2.5 text-xs font-bold uppercase tracking-[0.34em] text-(--mood-accent)">
         <span
           aria-hidden="true"
           className="size-2 rounded-full bg-(--mood-accent) shadow-[0_0_12px_var(--mood-accent)]"

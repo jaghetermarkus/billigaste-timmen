@@ -24,13 +24,16 @@ export function CurrentPrice({ prices, min, max }: Props) {
     : null;
 
   return (
-    <section aria-label="Pris just nu" className="flex flex-col items-center">
+    <section
+      aria-label="Pris just nu"
+      className="flex flex-col items-center lg:items-start"
+    >
       <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
         Just nu
       </p>
 
       <p className="mt-1 flex items-baseline gap-2">
-        <span className="text-[76px] leading-none font-extralight tracking-tight tabular-nums">
+        <span className="text-[76px] lg:text-[104px] leading-none font-extralight tracking-tight tabular-nums">
           {current ? ore(current.SEK_per_kWh) : "–"}
         </span>
         <span className="text-sm text-muted-foreground">öre/kWh</span>
