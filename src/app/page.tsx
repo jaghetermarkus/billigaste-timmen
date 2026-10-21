@@ -140,15 +140,18 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
           </div>
         )}
 
-        {day !== "imorgon" && (
-          <div className="mt-8 lg:col-start-1">
-            <CurrentPrice
-              prices={prices}
-              min={stats.min.SEK_per_kWh}
-              max={stats.max.SEK_per_kWh}
-            />
-          </div>
-        )}
+        <div className="mt-8 lg:col-start-1">
+          <CurrentPrice
+            prices={prices}
+            min={stats.min.SEK_per_kWh}
+            max={stats.max.SEK_per_kWh}
+            fixed={
+              day === "imorgon"
+                ? { label: "Snittpris i morgon", price: stats.average }
+                : undefined
+            }
+          />
+        </div>
 
         <section className="glass mt-4 rounded-[22px] px-3.5 pt-3.5 pb-3 lg:col-start-2 lg:row-span-3 lg:row-start-2 lg:mt-0 lg:rounded-3xl lg:px-5 lg:pt-4 lg:pb-4">
           <PriceChart

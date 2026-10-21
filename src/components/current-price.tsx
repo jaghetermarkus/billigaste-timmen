@@ -8,33 +8,40 @@ type Props = {
   prices: Price[];
   min: number; // SEK/kWh, dagens lägsta
   max: number; // SEK/kWh, dagens högsta
+  /** Visa ett fast pris i stället för just nu, t.ex. snittet i morgon */
+  fixed?: { label: string; price: number };
 };
 
 const ore = (sek: number) => (sek * 100).toFixed(1);
 
-export function CurrentPrice({ prices, min, max }: Props) {
+export function CurrentPrice({ prices, min, max, fixed }: Props) {
   const now = useNow();
   const current = now === null ? undefined : findPriceAt(prices, new Date(now));
 
+  // Antingen det fasta priset eller priset just nu (SEK/kWh)
+  const price = fixed ? fixed.price : current?.SEK_per_kWh;
+  const label = fixed ? fixed.label : "Just nu";
+
   // Var i intervallet priset ligger: 0 = lägst, 1 = högst
-  const position = current
-    ? max === min
-      ? 0.5
-      : (current.SEK_per_kWh - min) / (max - min)
-    : null;
+  const position =
+    price === undefined
+      ? null
+      : max === min
+        ? 0.5
+        : (price - min) / (max - min);
 
   return (
     <section
-      aria-label="Pris just nu"
+      aria-label={label}
       className="flex flex-col items-center lg:items-start"
     >
       <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-        Just nu
+        {label}
       </p>
 
       <p className="mt-1 flex items-baseline gap-2">
-        <span className="text-[76px] lg:text-[104px] leading-none font-extralight tracking-tight tabular-nums">
-          {current ? ore(current.SEK_per_kWh) : "–"}
+        <span className="text-[60px] leading-none font-light tracking-tight tabular-nums lg:text-[84px]">
+          {price !== undefined ? Math.round(price * 100) : "–"}
         </span>
         <span className="text-sm text-muted-foreground">öre/kWh</span>
       </p>
