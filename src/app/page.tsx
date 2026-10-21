@@ -1,21 +1,21 @@
-import { TZDate } from "@date-fns/tz";
-import { addDays, format, subDays } from "date-fns";
-import { connection } from "next/server";
-import { Suspense } from "react";
 import { AreaPicker } from "@/components/area-picker";
-import { fetchAreaOverview } from "@/lib/prices/fetch-area-overview";
 import { CurrentPrice } from "@/components/current-price";
 import { DayTabs, type Day } from "@/components/day-tabs";
 import { MoodLine } from "@/components/mood-line";
 import { PriceChart } from "@/components/price-chart";
+import { areaCookie, parseArea, type Area } from "@/lib/domain/area";
 import { findCheapestWindow } from "@/lib/domain/cheapest-window";
 import { getDayStats } from "@/lib/domain/day-stats";
 import { getMood } from "@/lib/domain/mood";
+import { fetchAreaOverview } from "@/lib/prices/fetch-area-overview";
 import { fetchPrices } from "@/lib/prices/fetch-prices";
 import { fetchReferenceAverage } from "@/lib/prices/fetch-reference-average";
 import type { Price } from "@/lib/prices/schema";
-import { sv } from "date-fns/locale";
-import { parseArea, type Area } from "@/lib/domain/area";
+import { TZDate } from "@date-fns/tz";
+import { addDays, format, subDays } from "date-fns";
+import { cookies } from "next/headers";
+import { connection } from "next/server";
+import { Suspense } from "react";
 
 type SearchParams = Promise<{ dag?: string; omrade?: string }>;
 
@@ -37,7 +37,8 @@ export default function Home({ searchParams }: { searchParams: SearchParams }) {
 async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
   const { dag, omrade } = await searchParams;
   const day: Day = dag === "imorgon" || dag === "2dagar" ? dag : "idag";
-  const area: Area = parseArea(omrade);
+  const cookieStore = await cookies();
+  const area = parseArea(omrade ?? cookieStore.get(areaCookie)?.value);
 
   await connection();
   const now = new TZDate(new Date(), "Europe/Stockholm");

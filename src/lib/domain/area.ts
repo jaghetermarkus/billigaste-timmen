@@ -16,3 +16,6 @@ export function parseArea(value: string | undefined): Area {
   const upper = value?.toUpperCase();
   return areas.find((a) => a === upper) ?? defaultArea;
 }
+
+/** Namnet på cookien som kommer ihåg valt elområde */
+export const areaCookie = "omrade";

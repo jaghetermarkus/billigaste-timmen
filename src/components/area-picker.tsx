@@ -1,13 +1,13 @@
 "use client";
 
-import { areaCities, areas, type Area } from "@/lib/domain/area";
+import { areaCities, areaCookie, areas, type Area } from "@/lib/domain/area";
 import { moodLabels } from "@/lib/domain/mood";
 import type { AreaOverview } from "@/lib/prices/fetch-area-overview";
 import { ChevronDown } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { hrefFor, type Day } from "./day-tabs";
-import { useId, useRef, useState, useTransition } from "react";
 import Link, { useLinkStatus } from "next/link";
+import { useRouter } from "next/navigation";
+import { useId, useRef, useState, useTransition } from "react";
+import { hrefFor, type Day } from "./day-tabs";
 
 // Förenklad Sverigekarta från designen (viewBox 0 0 200 432)
 const SWEDEN =
@@ -41,6 +41,7 @@ export function AreaPicker({ area, day, overview }: Props) {
   const [pendingArea, setPendingArea] = useState<Area | null>(null);
 
   const pick = (a: Area) => {
+    rememberArea(a);
     setPendingArea(a);
     startTransition(() => router.push(hrefFor(day, a), { scroll: false }));
   };
@@ -177,6 +178,7 @@ export function AreaPicker({ area, day, overview }: Props) {
                 return (
                   <li key={o.area} data-mood={o.mood ?? "vanlig"}>
                     <Link
+                      onClick={() => rememberArea(o.area)}
                       href={hrefFor(day, o.area)}
                       scroll={false}
                       aria-current={selected ? "true" : undefined}
@@ -229,4 +231,9 @@ function MoodDot() {
       }`}
     />
   );
+}
+
+/** Sparar valt område i ett år */
+function rememberArea(area: Area) {
+  document.cookie = `${areaCookie}=${area}; path=/; max-age=31536000; samesite=lax`;
 }

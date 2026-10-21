@@ -10,13 +10,12 @@ const tabs = [
   { id: "2dagar", label: "2 dagar" },
 ] as const;
 
-/** Bygger t.ex. "/?dag=imorgon&omrade=SE3". Standardvärden utelämnas. */
+/** Bygger t.ex. "/?dag=imorgon&omrade=SE3". "I dag" utelämnas. */
 export function hrefFor(day: Day, area: Area) {
   const params = new URLSearchParams();
   if (day !== "idag") params.set("dag", day);
-  if (area !== defaultArea) params.set("omrade", area);
-  const query = params.toString();
-  return query ? `/?${query}` : "/";
+  params.set("omrade", area);
+  return `/?${params.toString()}`;
 }
 
 type Props = {
