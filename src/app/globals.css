@@ -225,6 +225,20 @@
   --mood-glow: rgba(236, 80, 80, 0.4);
 }
 
+/* Färgskala för priset i grafen: billigast → dyrast */
+:root {
+  --scale-0: rgb(15 154 106);
+  --scale-1: rgb(196 143 12);
+  --scale-2: rgb(224 106 42);
+  --scale-3: rgb(210 63 63);
+}
+.dark {
+  --scale-0: rgb(79 214 160);
+  --scale-1: rgb(242 200 91);
+  --scale-2: rgb(255 154 92);
+  --scale-3: rgb(255 107 107);
+}
+
 /* Skimret ligger på html och täcker därmed hela sidan */
 html {
   min-height: 100lvh;

@@ -154,10 +154,10 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
             <div className="mt-2 flex items-center gap-2 border-t border-foreground/10 px-0.5 pt-2 text-[13px]">
               <span
                 aria-hidden="true"
-                className="size-2 rounded-[2px] bg-(--mood-accent) shadow-[0_0_8px_var(--mood-accent)]"
+                className="size-2 rounded-[2px] bg-(--scale-0) shadow-[0_0_8px_var(--scale-0)]"
               />
               <span className="text-muted-foreground">{cheapestLabel}</span>
-              <span className="ml-auto font-serif text-[17px] font-semibold text-(--mood-accent) tabular-nums">
+              <span className="ml-auto font-serif text-[17px] font-semibold text-(--scale-0) tabular-nums">
                 {timeOf(prices[cheapest.startIndex])}–
                 {endTimeOf(prices[cheapest.startIndex + cheapest.length - 1])}
               </span>
