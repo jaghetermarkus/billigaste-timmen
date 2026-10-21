@@ -3,12 +3,9 @@
 import { useId, useState, type KeyboardEvent, type PointerEvent } from "react";
 import type { Price } from "@/lib/prices/schema";
 import { useNow } from "@/hooks/use-now";
+import { useElementWidth } from "@/hooks/use-element-width";
 
-// Ritytan. viewBox har samma proportioner som i designen och skalas jämnt.
-const W = 334;
-const H = 132;
 const TOP = 14; // luft ovanför högsta priset
-const BASE = H - 1.5; // y-värdet för noll öre
 
 type Props = {
   prices: Price[];
@@ -60,6 +57,13 @@ export function PriceChart({ prices, highlight, dayNames = {} }: Props) {
   const now = useNow();
   // Unikt id för gradienter och mask, utan tecken som inte fungerar i url(#...)
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, "");
+
+  // Ritytan är lika bred som grafen i pixlar, så att linjer och text får samma storlek på alla skärmar.
+  // Höjden följer bredden med designens proportioner (334 × 132).
+  const [figureRef, measured] = useElementWidth<HTMLElement>(334);
+  const W = Math.max(measured, 200);
+  const H = Math.round(W * (132 / 334));
+  const BASE = H - 1.5; // y-värdet för det lägsta priset
 
   const n = prices.length;
   const values = prices.map((p) => p.SEK_per_kWh);
@@ -162,7 +166,7 @@ export function PriceChart({ prices, highlight, dayNames = {} }: Props) {
   };
 
   return (
-    <figure className="flex flex-col gap-2">
+    <figure ref={figureRef} className="flex flex-col gap-2">
       <figcaption
         className="flex items-baseline justify-between px-0.5 tabular-nums"
         aria-live="polite"
@@ -244,7 +248,7 @@ export function PriceChart({ prices, highlight, dayNames = {} }: Props) {
               <text
                 x={1}
                 y={gy - 3}
-                fontSize={8.5}
+                fontSize={10}
                 fill="currentColor"
                 fillOpacity={0.4}
                 className="tabular-nums"
@@ -278,7 +282,7 @@ export function PriceChart({ prices, highlight, dayNames = {} }: Props) {
             x={band.x1}
             y={8}
             width={band.x2 - band.x1}
-            height={124}
+            height={H - 8}
             rx={5}
             style={{ fill: "var(--scale-0)" }}
             fillOpacity={0.13}
