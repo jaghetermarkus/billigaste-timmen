@@ -145,6 +145,7 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
 
         <section className="glass mt-4 rounded-[22px] px-3.5 pt-3.5 pb-3">
           <PriceChart
+            key={`${day}-${area}`}
             prices={prices}
             highlight={cheapest}
             dayNames={dayNames}
