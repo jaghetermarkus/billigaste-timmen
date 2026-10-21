@@ -26,7 +26,7 @@ const dateOf = (p: Price) => p.time_start.slice(0, 10);
 
 export default function Home({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <main className="mx-auto w-full max-w-md px-5 pb-24 pt-2">
+    <main className="mx-auto w-full max-w-md px-5 pt-2 pb-24 lg:max-w-6xl lg:px-8 lg:pt-6">
       <Suspense fallback={<p>Hämtar priser…</p>}>
         <DayPrices searchParams={searchParams} />
       </Suspense>
@@ -60,7 +60,7 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
   if (!prices) {
     return (
       <>
-        <DayTabs day={day} />
+        <DayTabs day={day} area={area} />
         <p className="mt-6">
           {day === "imorgon"
             ? "Morgondagens priser publiceras runt kl 13. Titta in lite senare."
@@ -113,13 +113,17 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
 
   return (
     <div data-mood={mood} data-page-mood={mood}>
-      <div className="relative z-10">
-        <div className="flex items-center justify-between">
+      <div className="relative z-10 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:grid-rows-[auto_auto_auto_1fr] lg:items-start lg:gap-x-14">
+        <div className="flex items-center justify-between lg:col-span-2 lg:mb-6">
           {/* <span className="glass rounded-full px-3 py-1.5 text-[13px] font-semibold tracking-wide">
             {area}
           </span> */}
           <AreaPicker area={area} day={day} overview={overview} />
-          <DayTabs day={day} tomorrowAvailable={tomorrowAvailable} />
+          <DayTabs
+            day={day}
+            area={area}
+            tomorrowAvailable={tomorrowAvailable}
+          />
         </div>
 
         {/* <p className="mt-6 text-center text-[13px] text-muted-foreground first-letter:uppercase">
@@ -127,15 +131,17 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
         </p> */}
 
         {reference !== null && (
-          <MoodLine
-            mood={mood}
-            dayAverage={moodAverage}
-            referenceAverage={reference}
-          />
+          <div className="lg:col-start-1">
+            <MoodLine
+              mood={mood}
+              dayAverage={moodAverage}
+              referenceAverage={reference}
+            />
+          </div>
         )}
 
         {day !== "imorgon" && (
-          <div className="mt-8">
+          <div className="mt-8 lg:col-start-1">
             <CurrentPrice
               prices={prices}
               min={stats.min.SEK_per_kWh}
@@ -144,7 +150,7 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
           </div>
         )}
 
-        <section className="glass mt-4 rounded-[22px] px-3.5 pt-3.5 pb-3">
+        <section className="glass mt-4 rounded-[22px] px-3.5 pt-3.5 pb-3 lg:col-start-2 lg:row-span-3 lg:row-start-2 lg:mt-0 lg:rounded-3xl lg:px-5 lg:pt-4 lg:pb-4">
           <PriceChart
             key={`${day}-${area}`}
             prices={prices}
@@ -167,7 +173,7 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
           )}
         </section>
 
-        <dl className="glass mt-3 grid grid-cols-3 rounded-[18px]">
+        <dl className="glass mt-3 grid grid-cols-3 rounded-[18px] lg:col-start-1 lg:mt-8">
           {statItems.map((s) => (
             <div
               key={s.label}
