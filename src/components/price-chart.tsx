@@ -45,6 +45,16 @@ function scaleColor(level: number) {
   return SCALE[SCALE.length - 1].color;
 }
 
+/** Jämna steg i öre, valda så att det blir högst tre stödlinjer. */
+function gridSteps(maxOre: number) {
+  const step =
+    [10, 20, 25, 50, 100, 200, 250, 500].find((s) => maxOre / s <= 3) ?? 1000;
+  return Array.from(
+    { length: Math.floor(maxOre / step) + 1 },
+    (_, k) => k * step,
+  );
+}
+
 export function PriceChart({ prices, highlight, dayNames = {} }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const now = useNow();
@@ -56,11 +66,15 @@ export function PriceChart({ prices, highlight, dayNames = {} }: Props) {
   const min = Math.min(...values);
   const max = Math.max(...values);
   const x = (i: number) => 1.2 + (i * (W - 2.4)) / Math.max(1, n - 1);
+  // Y-axeln går från noll, eller från dagens lägsta pris om det är minus, till dagens högsta
+  const lo = Math.min(0, min);
+  const hi = Math.max(0, max);
   const y = (v: number) =>
-    BASE - Math.max(3, (Math.max(v, 0) / Math.max(max, 0.0001)) * (BASE - TOP));
+    BASE - ((v - lo) / Math.max(hi - lo, 0.0001)) * (BASE - TOP);
   const level = (v: number) => (max === min ? 0.5 : (v - min) / (max - min));
   const colorOf = (i: number) => scaleColor(level(values[i]));
   const percent = (i: number) => `${(x(i) / W) * 100}%`;
+  const grid = gridSteps(max * 100);
 
   // Index där en ny dag börjar (midnatt), och varje dags start, slut och namn
   const dayStarts = prices.flatMap((p, i) =>
@@ -73,11 +87,11 @@ export function PriceChart({ prices, highlight, dayNames = {} }: Props) {
   }));
   const multiDay = days.length > 1;
 
-  // Klockslag var sjätte timme, var tolfte med två dagar
-  const tickEvery = multiDay ? 12 : 6;
+  // Klockslag: 02, 06, 10 … med en dag. 06 och 18 med två dagar.
+  const tick = multiDay ? { every: 12, from: 6 } : { every: 4, from: 2 };
   const ticks = prices.flatMap((p, i) => {
     const [hour, minute] = timeOf(p).split(":");
-    return i > 0 && minute === "00" && Number(hour) % tickEvery === 0
+    return minute === "00" && Number(hour) % tick.every === tick.from
       ? [{ i, label: hour }]
       : [];
   });
@@ -214,6 +228,33 @@ export function PriceChart({ prices, highlight, dayNames = {} }: Props) {
           </mask>
         </defs>
 
+        {/* Stödlinjer med öre */}
+        {grid.map((v) => {
+          const gy = y(v / 100);
+          return (
+            <g key={v}>
+              <line
+                x1={0}
+                x2={W}
+                y1={gy}
+                y2={gy}
+                stroke="currentColor"
+                strokeOpacity={0.07}
+              />
+              <text
+                x={1}
+                y={gy - 3}
+                fontSize={8.5}
+                fill="currentColor"
+                fillOpacity={0.4}
+                className="tabular-nums"
+              >
+                {v}
+              </text>
+            </g>
+          );
+        })}
+
         {/* Streckad linje vid midnatt */}
         {dayStarts.map((i) => {
           const mid = (x(i - 1) + x(i)) / 2;
@@ -309,10 +350,9 @@ export function PriceChart({ prices, highlight, dayNames = {} }: Props) {
       </svg>
 
       <div
-        className="relative h-4 text-[11px] text-muted-foreground tabular-nums"
+        className="relative -mt-1 h-4 text-[11px] text-muted-foreground tabular-nums"
         aria-hidden="true"
       >
-        <span className="absolute left-0">00</span>
         {ticks.map((t) => (
           <span
             key={t.i}
@@ -322,7 +362,6 @@ export function PriceChart({ prices, highlight, dayNames = {} }: Props) {
             {t.label}
           </span>
         ))}
-        <span className="absolute right-0">24</span>
       </div>
     </figure>
   );

@@ -151,7 +151,7 @@ async function DayPrices({ searchParams }: { searchParams: SearchParams }) {
           />
 
           {cheapest && (
-            <div className="mt-2 flex items-center gap-2 border-t border-foreground/10 px-0.5 pt-2 text-[13px]">
+            <div className="mt-4 flex items-center gap-2 border-t border-foreground/10 px-0.5 pt-3 text-[13px]">
               <span
                 aria-hidden="true"
                 className="size-2 rounded-[2px] bg-(--scale-0) shadow-[0_0_8px_var(--scale-0)]"
