@@ -34,7 +34,7 @@ describe("kostnad per mil", () => {
   });
 
   it("räknar bensinbilen", () => {
-    expect(fuelSekPerMil(defaultEvSettings)).toBeCloseTo(11.375, 3);
+    expect(fuelSekPerMil(defaultEvSettings)).toBeCloseTo(11.3685, 4);
   });
 
   it("ger procent billigare, och negativt när elbilen är dyrare", () => {

@@ -1,10 +1,3 @@
-import { Suspense } from "react";
-import { cookies } from "next/headers";
-import { connection } from "next/server";
-import { TZDate } from "@date-fns/tz";
-import { addDays, format } from "date-fns";
-import { ChevronLeft } from "lucide-react";
-
 import { AreaLink } from "@/components/area-link";
 import { EvPlanner } from "@/components/ev-planner";
 import { areaCities, areaCookie, parseArea } from "@/lib/domain/area";
@@ -12,6 +5,12 @@ import { getDayStats } from "@/lib/domain/day-stats";
 import { getMood } from "@/lib/domain/mood";
 import { fetchPrices } from "@/lib/prices/fetch-prices";
 import { fetchReferenceAverage } from "@/lib/prices/fetch-reference-average";
+import { TZDate } from "@date-fns/tz";
+import { addDays, format } from "date-fns";
+import { ChevronLeft, SlidersHorizontal } from "lucide-react";
+import { cookies } from "next/headers";
+import { connection } from "next/server";
+import { Suspense } from "react";
 
 export const metadata = { title: "Elbil · Billigaste timmen" };
 
@@ -31,9 +30,18 @@ export default function EvPage({
         <ChevronLeft className="size-4" aria-hidden="true" />
         Maskiner
       </AreaLink>
-      <h1 className="font-serif text-[32px] leading-tight font-semibold">
-        Elbil
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="font-serif text-[32px] leading-tight font-semibold">
+          Elbil
+        </h1>
+        <AreaLink
+          href="/maskiner/elbil/installningar"
+          aria-label="Inställningar för elbilen"
+          className="glass grid size-10 place-items-center rounded-full"
+        >
+          <SlidersHorizontal className="size-4" aria-hidden="true" />
+        </AreaLink>
+      </div>
 
       <Suspense
         fallback={<p className="text-muted-foreground mt-2">Hämtar priser…</p>}

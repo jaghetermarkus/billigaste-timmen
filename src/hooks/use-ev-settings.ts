@@ -1,14 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
+
 import { defaultEvSettings, type EvSettings } from "@/lib/domain/ev";
+import {
+  changedEvSettings,
+  evSettingsKey,
+  parseEvSettings,
+} from "@/lib/domain/ev-settings";
 
-/** Elbilens inställningar. Än så länge bara i minnet; i steg 21 sparas de i localStorage. */
+// localStorage meddelar bara andra flikar när något ändras, så vi skickar en egen händelse i samma flik
+const changeEvent = "ev-settings-change";
+
+function subscribe(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  window.addEventListener(changeEvent, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(changeEvent, onChange);
+  };
+}
+
+function read(): string | null {
+  try {
+    return localStorage.getItem(evSettingsKey);
+  } catch {
+    return null; // t.ex. privat läge i vissa webbläsare
+  }
+}
+
+function write(settings: EvSettings) {
+  try {
+    localStorage.setItem(
+      evSettingsKey,
+      JSON.stringify(changedEvSettings(settings)),
+    );
+  } catch {
+    // Går det inte att spara gäller ändringen ändå inte. Inget mer att göra.
+  }
+  window.dispatchEvent(new Event(changeEvent));
+}
+
+/** Elbilens inställningar, sparade i webbläsaren och delade mellan sidor och flikar. */
 export function useEvSettings() {
-  const [settings, setSettings] = useState<EvSettings>(defaultEvSettings);
+  const raw = useSyncExternalStore(subscribe, read, () => null);
+  const settings = useMemo(() => parseEvSettings(raw), [raw]);
 
-  const update = (changes: Partial<EvSettings>) =>
-    setSettings((current) => ({ ...current, ...changes }));
+  const update = useCallback((changes: Partial<EvSettings>) => {
+    write({ ...parseEvSettings(read()), ...changes });
+  }, []);
 
-  return [settings, update] as const;
+  const reset = useCallback(() => write(defaultEvSettings), []);
+
+  return [settings, update, reset] as const;
 }

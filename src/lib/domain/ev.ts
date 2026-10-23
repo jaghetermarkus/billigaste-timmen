@@ -23,6 +23,15 @@ export type EvSettings = {
   fuelSekPerLiter: number;
 };
 
+/** Standard för varje bränsle. Listpriser 23 okt 2026, uppdatera då och då. */
+export const fuelDefaults: Record<
+  Fuel,
+  { litersPerMil: number; fuelSekPerLiter: number }
+> = {
+  bensin: { litersPerMil: 0.65, fuelSekPerLiter: 17.49 },
+  diesel: { litersPerMil: 0.55, fuelSekPerLiter: 22.94 },
+};
+
 export const defaultEvSettings: EvSettings = {
   kwhPerMil: 1.7,
   batteryKwh: 75,
@@ -33,17 +42,7 @@ export const defaultEvSettings: EvSettings = {
   feeOrePerKwh: 85,
   lossPercent: 10,
   fuel: "bensin",
-  litersPerMil: 0.65,
-  fuelSekPerLiter: 17.5,
-};
-
-/** Rimliga startvärden när man byter bränsle */
-export const fuelDefaults: Record<
-  Fuel,
-  { litersPerMil: number; fuelSekPerLiter: number }
-> = {
-  bensin: { litersPerMil: 0.65, fuelSekPerLiter: 17.5 },
-  diesel: { litersPerMil: 0.55, fuelSekPerLiter: 18.2 },
+  ...fuelDefaults.bensin,
 };
 
 const VAT = 1.25;
