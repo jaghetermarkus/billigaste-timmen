@@ -1,3 +1,4 @@
+import { AppNav } from "@/components/app-nav";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -39,7 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         inter.variable,
       )}
     >
-      <body className="flex min-h-lvh flex-col bg-transparent">
+      <body className="flex min-h-lvh flex-col bg-transparent pb-28">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -64,6 +65,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               . Spotpris exkl. moms och avgifter.
             </p>
           </footer>
+          <AppNav />
         </ThemeProvider>
       </body>
     </html>
