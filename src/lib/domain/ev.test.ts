@@ -1,0 +1,107 @@
+import { describe, expect, it } from "vitest";
+
+import type { Price } from "../prices/schema";
+import {
+  chargeKwh,
+  chargeQuarters,
+  defaultEvSettings,
+  evSekPerMil,
+  findChargeWindow,
+  fuelSekPerMil,
+  nextDeadline,
+  percentCheaper,
+} from "./ev";
+
+const QUARTER = 15 * 60 * 1000;
+
+/** Kvartspriser från start, en kvart per värde */
+function quarters(startIso: string, values: number[]): Price[] {
+  const start = new Date(startIso).getTime();
+  return values.map((sek, i) => ({
+    SEK_per_kWh: sek,
+    EUR_per_kWh: 0,
+    EXR: 0,
+    time_start: new Date(start + i * QUARTER).toISOString(),
+    time_end: new Date(start + (i + 1) * QUARTER).toISOString(),
+  }));
+}
+
+describe("kostnad per mil", () => {
+  it("räknar med moms, avgifter och laddförlust", () => {
+    // (0,42 × 1,25 + 0,85) × 1,7 × 1,1
+    expect(evSekPerMil(0.42, defaultEvSettings)).toBeCloseTo(2.571, 3);
+  });
+
+  it("räknar bensinbilen", () => {
+    expect(fuelSekPerMil(defaultEvSettings)).toBeCloseTo(11.375, 3);
+  });
+
+  it("ger procent billigare, och negativt när elbilen är dyrare", () => {
+    expect(percentCheaper(2.5, 10)).toBe(75);
+    expect(percentCheaper(12, 10)).toBe(-20);
+  });
+});
+
+describe("laddningen", () => {
+  it("räknar energin från väggen", () => {
+    // 75 kWh × 60 % × 1,1
+    expect(chargeKwh(defaultEvSettings)).toBeCloseTo(49.5, 3);
+  });
+
+  it("avrundar laddtiden uppåt till hela kvartar", () => {
+    // 49,5 kWh / 11 kW = 4,5 h = 18 kvartar
+    expect(chargeQuarters(defaultEvSettings)).toBe(18);
+    expect(chargeQuarters({ ...defaultEvSettings, chargerKw: 10 })).toBe(20);
+  });
+});
+
+describe("nextDeadline", () => {
+  it("tar 07:00 i morgon på kvällen", () => {
+    const now = new Date("2026-10-23T18:00:00+02:00");
+    expect(nextDeadline(now, "07:00").toISOString()).toBe(
+      "2026-10-24T05:00:00.000Z",
+    );
+  });
+
+  it("tar 07:00 i dag tidigt på morgonen", () => {
+    const now = new Date("2026-10-24T03:00:00+02:00");
+    expect(nextDeadline(now, "07:00").toISOString()).toBe(
+      "2026-10-24T05:00:00.000Z",
+    );
+  });
+
+  it("klarar natten när sommartiden tar slut", () => {
+    // 25 oktober 2026 går klockan tillbaka, så 07:00 är +01:00
+    const now = new Date("2026-10-24T18:00:00+02:00");
+    expect(nextDeadline(now, "07:00").toISOString()).toBe(
+      "2026-10-25T06:00:00.000Z",
+    );
+  });
+});
+
+describe("findChargeWindow", () => {
+  // 18:00 till 12:00 dagen efter. Billigt 02–04, ännu billigare 08–10 (efter deadline).
+  const values = Array.from({ length: 72 }, (_, i) =>
+    i >= 32 && i < 40 ? 0.1 : i >= 56 && i < 64 ? 0 : 1,
+  );
+  const prices = quarters("2026-10-23T18:00:00+02:00", values);
+
+  it("väljer billigaste fönstret före deadline", () => {
+    const now = new Date("2026-10-23T18:00:00+02:00");
+    const w = findChargeWindow(prices, { now, readyBy: "07:00", quarters: 8 });
+    expect(w?.startIndex).toBe(32); // 02:00
+  });
+
+  it("hoppar över kvartar som redan har passerat", () => {
+    const now = new Date("2026-10-24T03:00:00+02:00");
+    const w = findChargeWindow(prices, { now, readyBy: "07:00", quarters: 8 });
+    expect(w?.startIndex).toBe(36); // 03:00, resten av det billiga
+  });
+
+  it("ger null när laddningen inte hinner bli klar", () => {
+    const now = new Date("2026-10-24T05:00:00+02:00");
+    expect(
+      findChargeWindow(prices, { now, readyBy: "07:00", quarters: 12 }),
+    ).toBeNull();
+  });
+});
