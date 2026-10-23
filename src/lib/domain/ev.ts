@@ -1,6 +1,5 @@
 import { TZDate } from "@date-fns/tz";
-import { addDays } from "date-fns";
-
+import { addDays, format } from "date-fns";
 import type { Price } from "../prices/schema";
 import { findCheapestWindow, type PriceWindow } from "./cheapest-window";
 
@@ -122,4 +121,18 @@ export function percentCheaper(
   fuelSekPerMilValue: number,
 ) {
   return Math.round((1 - evSekPerMil / fuelSekPerMilValue) * 100);
+}
+
+/** "I kväll", "I natt", "I morgon" eller "I dag" för en starttid, sett från now. */
+export function startLabel(timeStart: string, now: Date) {
+  const local = new TZDate(now, "Europe/Stockholm");
+  const today = format(local, "yyyy-MM-dd");
+  const tomorrow = format(addDays(local, 1), "yyyy-MM-dd");
+  const date = timeStart.slice(0, 10);
+  const hour = Number(timeStart.slice(11, 13));
+
+  if (date === today)
+    return hour < 6 || hour >= 22 ? "I natt" : hour >= 17 ? "I kväll" : "I dag";
+  if (date === tomorrow) return hour < 6 ? "I natt" : "I morgon";
+  return "";
 }

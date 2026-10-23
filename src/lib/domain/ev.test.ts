@@ -10,6 +10,7 @@ import {
   fuelSekPerMil,
   nextDeadline,
   percentCheaper,
+  startLabel,
 } from "./ev";
 
 const QUARTER = 15 * 60 * 1000;
@@ -103,5 +104,29 @@ describe("findChargeWindow", () => {
     expect(
       findChargeWindow(prices, { now, readyBy: "07:00", quarters: 12 }),
     ).toBeNull();
+  });
+});
+
+describe("startLabel", () => {
+  const evening = new Date("2026-10-23T17:15:00+02:00");
+
+  it("säger i kväll och i natt samma dag", () => {
+    expect(startLabel("2026-10-23T19:00:00+02:00", evening)).toBe("I kväll");
+    expect(startLabel("2026-10-23T23:00:00+02:00", evening)).toBe("I natt");
+  });
+
+  it("säger i natt och i morgon dagen efter", () => {
+    expect(startLabel("2026-10-24T01:15:00+02:00", evening)).toBe("I natt");
+    expect(startLabel("2026-10-24T09:00:00+02:00", evening)).toBe("I morgon");
+  });
+
+  it("säger i natt efter midnatt, samma datum", () => {
+    const lateNight = new Date("2026-10-24T00:30:00+02:00");
+    expect(startLabel("2026-10-24T02:00:00+02:00", lateNight)).toBe("I natt");
+  });
+
+  it("säger i dag på dagen", () => {
+    const morning = new Date("2026-10-23T10:00:00+02:00");
+    expect(startLabel("2026-10-23T13:00:00+02:00", morning)).toBe("I dag");
   });
 });

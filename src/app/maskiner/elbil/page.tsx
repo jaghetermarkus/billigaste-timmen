@@ -1,9 +1,27 @@
-import { AreaLink } from "@/components/area-link";
+import { Suspense } from "react";
+import { cookies } from "next/headers";
+import { connection } from "next/server";
+import { TZDate } from "@date-fns/tz";
+import { addDays, format } from "date-fns";
 import { ChevronLeft } from "lucide-react";
+
+import { AreaLink } from "@/components/area-link";
+import { EvPlanner } from "@/components/ev-planner";
+import { areaCities, areaCookie, parseArea } from "@/lib/domain/area";
+import { getDayStats } from "@/lib/domain/day-stats";
+import { getMood } from "@/lib/domain/mood";
+import { fetchPrices } from "@/lib/prices/fetch-prices";
+import { fetchReferenceAverage } from "@/lib/prices/fetch-reference-average";
 
 export const metadata = { title: "Elbil · Billigaste timmen" };
 
-export default function EvPage() {
+type SearchParams = Promise<{ omrade?: string }>;
+
+export default function EvPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   return (
     <main className="mx-auto w-full max-w-md px-5 pt-2 lg:max-w-6xl lg:px-8 lg:pt-6">
       <AreaLink
@@ -13,7 +31,44 @@ export default function EvPage() {
         <ChevronLeft className="size-4" aria-hidden="true" />
         Maskiner
       </AreaLink>
-      <h1 className="font-heading text-[32px] font-semibold">Elbil</h1>
+      <h1 className="font-serif text-[32px] leading-tight font-semibold">
+        Elbil
+      </h1>
+
+      <Suspense
+        fallback={<p className="text-muted-foreground mt-2">Hämtar priser…</p>}
+      >
+        <EvPrices searchParams={searchParams} />
+      </Suspense>
     </main>
+  );
+}
+
+async function EvPrices({ searchParams }: { searchParams: SearchParams }) {
+  const { omrade } = await searchParams;
+  const cookieStore = await cookies();
+  const area = parseArea(omrade ?? cookieStore.get(areaCookie)?.value);
+
+  await connection();
+  const now = new TZDate(new Date(), "Europe/Stockholm");
+  const get = (date: Date) =>
+    fetchPrices(format(date, "yyyy/MM-dd"), area).catch(() => null);
+
+  const [today, tomorrow] = await Promise.all([get(now), get(addDays(now, 1))]);
+  if (!today) return <p className="mt-2">Kunde inte hämta priserna just nu.</p>;
+
+  const reference = await fetchReferenceAverage(
+    format(now, "yyyy/MM-dd"),
+    area,
+  );
+  const mood = getMood(getDayStats(today).average, reference);
+
+  return (
+    <div data-mood={mood} data-page-mood={mood}>
+      <EvPlanner prices={[...today, ...(tomorrow ?? [])]} />
+      <p className="text-muted-foreground mt-4 text-xs">
+        Spotpris för {area} · {areaCities[area]}
+      </p>
+    </div>
   );
 }
