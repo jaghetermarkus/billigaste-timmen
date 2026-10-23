@@ -1,16 +1,11 @@
 import { AreaLink } from "@/components/area-link";
 import { EvPlanner } from "@/components/ev-planner";
-import { areaCities, areaCookie, parseArea } from "@/lib/domain/area";
-import { getDayStats } from "@/lib/domain/day-stats";
-import { getMood } from "@/lib/domain/mood";
-import { fetchPrices } from "@/lib/prices/fetch-prices";
-import { fetchReferenceAverage } from "@/lib/prices/fetch-reference-average";
-import { TZDate } from "@date-fns/tz";
-import { addDays, format } from "date-fns";
+import { areaCities } from "@/lib/domain/area";
 import { ChevronLeft, SlidersHorizontal } from "lucide-react";
-import { cookies } from "next/headers";
-import { connection } from "next/server";
 import { Suspense } from "react";
+
+import { areaFromRequest } from "@/lib/area-from-request";
+import { fetchUpcoming } from "@/lib/prices/fetch-upcoming";
 
 export const metadata = { title: "Elbil · Billigaste timmen" };
 
@@ -54,26 +49,14 @@ export default function EvPage({
 
 async function EvPrices({ searchParams }: { searchParams: SearchParams }) {
   const { omrade } = await searchParams;
-  const cookieStore = await cookies();
-  const area = parseArea(omrade ?? cookieStore.get(areaCookie)?.value);
-
-  await connection();
-  const now = new TZDate(new Date(), "Europe/Stockholm");
-  const get = (date: Date) =>
-    fetchPrices(format(date, "yyyy/MM-dd"), area).catch(() => null);
-
-  const [today, tomorrow] = await Promise.all([get(now), get(addDays(now, 1))]);
-  if (!today) return <p className="mt-2">Kunde inte hämta priserna just nu.</p>;
-
-  const reference = await fetchReferenceAverage(
-    format(now, "yyyy/MM-dd"),
-    area,
-  );
-  const mood = getMood(getDayStats(today).average, reference);
+  const area = await areaFromRequest(omrade);
+  const upcoming = await fetchUpcoming(area);
+  if (!upcoming)
+    return <p className="mt-2">Kunde inte hämta priserna just nu.</p>;
 
   return (
-    <div data-mood={mood} data-page-mood={mood}>
-      <EvPlanner prices={[...today, ...(tomorrow ?? [])]} />
+    <div data-mood={upcoming.mood} data-page-mood={upcoming.mood}>
+      <EvPlanner prices={upcoming.prices} />
       <p className="text-muted-foreground mt-4 text-xs">
         Spotpris för {area} · {areaCities[area]}
       </p>

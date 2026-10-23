@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { defaultEvSettings, fuelDefaults, fuelDefaults } from "./ev";
+import { defaultEvSettings, fuelDefaults } from "./ev";
 import { changedEvSettings, parseEvSettings } from "./ev-settings";
 
 describe("parseEvSettings", () => {

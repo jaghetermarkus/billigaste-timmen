@@ -135,3 +135,55 @@ export function startLabel(timeStart: string, now: Date) {
   if (date === tomorrow) return hour < 6 ? "I natt" : "I morgon";
   return "";
 }
+
+export type ChargePlan = {
+  /** Billigaste laddfönstret, index i hela prices */
+  window: PriceWindow;
+  /** Index för kvarten som pågår nu */
+  first: number;
+  perMil: number;
+  /** Om man börjar ladda direkt i stället */
+  nowPerMil: number;
+  /** Hela laddningen i kronor */
+  cost: number;
+  nowCost: number;
+  fuelPerMil: number;
+  /** Hur många procent billigare än bensin- eller dieselbilen */
+  percent: number;
+};
+
+/** Allt man behöver veta om nästa laddning, eller null om den inte hinner bli klar. */
+export function planCharge(
+  prices: Price[],
+  s: EvSettings,
+  now: Date,
+): ChargePlan | null {
+  const quarters = chargeQuarters(s);
+  const window = findChargeWindow(prices, {
+    now,
+    readyBy: s.readyBy,
+    quarters,
+  });
+  if (!window) return null;
+
+  const first = prices.findIndex(
+    (p) => new Date(p.time_end).getTime() > now.getTime(),
+  );
+  const nowSlice = prices.slice(first, first + quarters);
+  const nowAverage =
+    nowSlice.reduce((sum, p) => sum + p.SEK_per_kWh, 0) / nowSlice.length;
+
+  const perMil = evSekPerMil(window.average, s);
+  const fuelPerMil = fuelSekPerMil(s);
+
+  return {
+    window,
+    first,
+    perMil,
+    nowPerMil: evSekPerMil(nowAverage, s),
+    cost: allInSekPerKwh(window.average, s) * chargeKwh(s),
+    nowCost: allInSekPerKwh(nowAverage, s) * chargeKwh(s),
+    fuelPerMil,
+    percent: percentCheaper(perMil, fuelPerMil),
+  };
+}

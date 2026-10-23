@@ -1,21 +1,17 @@
 "use client";
 
+import { EvChart } from "@/components/ev-chart";
 import { useEvSettings } from "@/hooks/use-ev-settings";
 import { useNow } from "@/hooks/use-now";
 import {
-  allInSekPerKwh,
-  chargeKwh,
   chargeQuarters,
   evSekPerMil,
-  findChargeWindow,
   fuelDefaults,
-  fuelSekPerMil,
-  percentCheaper,
+  planCharge,
   startLabel,
   type Fuel,
 } from "@/lib/domain/ev";
 import type { Price } from "@/lib/prices/schema";
-import { EvChart } from "@/components/ev-chart";
 
 const kr = (value: number, decimals = 2) =>
   value.toLocaleString("sv-SE", {
@@ -23,8 +19,6 @@ const kr = (value: number, decimals = 2) =>
     maximumFractionDigits: decimals,
   });
 const timeOf = (iso: string) => iso.slice(11, 16);
-const averageOf = (ps: Price[]) =>
-  ps.reduce((sum, p) => sum + p.SEK_per_kWh, 0) / ps.length;
 
 const fuelNames: Record<Fuel, { label: string; car: string }> = {
   bensin: { label: "Bensin", car: "Bensinbil" },
@@ -40,15 +34,11 @@ export function EvPlanner({ prices }: { prices: Price[] }) {
     return <div className="mt-5 h-[640px]" aria-hidden="true" />;
 
   const quarters = chargeQuarters(settings);
-  const best = findChargeWindow(prices, {
-    now: new Date(now),
-    readyBy: settings.readyBy,
-    quarters,
-  });
+  const plan = planCharge(prices, settings, new Date(now));
 
   const subtitle = `${kr(settings.kwhPerMil, 1)} kWh/mil · laddar ${settings.fromPercent}→${settings.toPercent} % på ${kr(quarters / 4, 1)} h · klar ${settings.readyBy}`;
 
-  if (!best) {
+  if (!plan) {
     return (
       <>
         <p className="text-muted-foreground text-[13px]">{subtitle}</p>
@@ -60,23 +50,23 @@ export function EvPlanner({ prices }: { prices: Price[] }) {
     );
   }
 
-  // Jämför med att börja ladda direkt
-  const first = prices.findIndex((p) => new Date(p.time_end).getTime() > now);
-  const nowAverage = averageOf(prices.slice(first, first + quarters));
+  const {
+    window: best,
+    first,
+    perMil: bestPerMil,
+    nowPerMil,
+    cost: chargeCost,
+    nowCost,
+    fuelPerMil,
+    percent,
+  } = plan;
+
   // Grafen visar 24 timmar framåt
   const upcoming = prices.slice(first, first + 96);
   const perMil = upcoming.map((p) => evSekPerMil(p.SEK_per_kWh, settings));
 
   const start = prices[best.startIndex];
   const end = prices[best.startIndex + best.length - 1];
-  const bestPerMil = evSekPerMil(best.average, settings);
-  const nowPerMil = evSekPerMil(nowAverage, settings);
-  const chargeCost =
-    allInSekPerKwh(best.average, settings) * chargeKwh(settings);
-  const nowCost = allInSekPerKwh(nowAverage, settings) * chargeKwh(settings);
-
-  const fuelPerMil = fuelSekPerMil(settings);
-  const percent = percentCheaper(bestPerMil, fuelPerMil);
   const widest = Math.max(bestPerMil, fuelPerMil);
   const fuel = fuelNames[settings.fuel];
 

@@ -10,6 +10,7 @@ import {
   fuelSekPerMil,
   nextDeadline,
   percentCheaper,
+  planCharge,
   startLabel,
 } from "./ev";
 
@@ -128,5 +129,31 @@ describe("startLabel", () => {
   it("säger i dag på dagen", () => {
     const morning = new Date("2026-10-23T10:00:00+02:00");
     expect(startLabel("2026-10-23T13:00:00+02:00", morning)).toBe("I dag");
+  });
+});
+
+describe("planCharge", () => {
+  // 18:00 till 12:00: 1 kr överallt utom 0,2 kr kl 01–05
+  const values = Array.from({ length: 72 }, (_, i) =>
+    i >= 28 && i < 44 ? 0.2 : 1,
+  );
+  const prices = quarters("2026-10-23T18:00:00+02:00", values);
+  const s = { ...defaultEvSettings, chargerKw: 12.375 }; // 49,5 kWh på exakt 4 h = 16 kvartar
+
+  it("räknar ut fönster, kr/mil och kostnad", () => {
+    const plan = planCharge(prices, s, new Date("2026-10-23T18:00:00+02:00"));
+    expect(plan?.window.startIndex).toBe(28); // 01:00
+    expect(plan?.first).toBe(0);
+    expect(plan?.perMil).toBeCloseTo(evSekPerMil(0.2, s), 6);
+    expect(plan?.nowPerMil).toBeCloseTo(evSekPerMil(1, s), 6);
+    // (0,2 × 1,25 + 0,85) × 49,5 kWh
+    expect(plan?.cost).toBeCloseTo(54.45, 2);
+    expect(plan?.percent).toBeGreaterThan(0);
+  });
+
+  it("ger null när laddningen inte hinner bli klar", () => {
+    expect(
+      planCharge(prices, s, new Date("2026-10-24T05:00:00+02:00")),
+    ).toBeNull();
   });
 });
