@@ -1,8 +1,8 @@
-import { Suspense } from "react";
-
 import { EvCard } from "@/components/ev-card";
+import { MachineList } from "@/components/machine-list";
 import { areaFromRequest } from "@/lib/area-from-request";
 import { fetchUpcoming } from "@/lib/prices/fetch-upcoming";
+import { Suspense } from "react";
 
 export const metadata = { title: "Maskiner · Billigaste timmen" };
 
@@ -44,6 +44,11 @@ async function Machines({ searchParams }: { searchParams: SearchParams }) {
       className="mt-6 flex flex-col gap-2.5"
     >
       <EvCard prices={upcoming.prices} />
+      <MachineList prices={upcoming.prices} />
+      <p className="text-muted-foreground px-1 pt-1 text-xs leading-relaxed">
+        Besparingen räknas på maskinens förbrukning per gång och spotpriset med
+        moms. Skatt och nätavgift kostar lika mycket oavsett när du kör.
+      </p>
     </div>
   );
 }
