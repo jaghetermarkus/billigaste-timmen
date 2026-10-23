@@ -51,7 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <ThemeToggle />
           </header>
           {children}
-          <footer className="px-5 pb-8 text-center text-[10px] text-muted-foreground/45">
+          <footer className="mt-auto pt-8 px-5 pb-8 text-center text-[10px] text-muted-foreground/45">
             <p>
               Elpriser tillhandahålls av{" "}
               <a
