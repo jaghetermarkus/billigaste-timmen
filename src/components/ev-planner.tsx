@@ -15,6 +15,7 @@ import {
   type Fuel,
 } from "@/lib/domain/ev";
 import type { Price } from "@/lib/prices/schema";
+import { EvChart } from "@/components/ev-chart";
 
 const kr = (value: number, decimals = 2) =>
   value.toLocaleString("sv-SE", {
@@ -36,7 +37,7 @@ export function EvPlanner({ prices }: { prices: Price[] }) {
 
   // På servern vet vi inte vad klockan är hos besökaren. Håll platsen tills vi vet.
   if (now === null)
-    return <div className="mt-5 h-[440px]" aria-hidden="true" />;
+    return <div className="mt-5 h-[640px]" aria-hidden="true" />;
 
   const quarters = chargeQuarters(settings);
   const best = findChargeWindow(prices, {
@@ -62,6 +63,9 @@ export function EvPlanner({ prices }: { prices: Price[] }) {
   // Jämför med att börja ladda direkt
   const first = prices.findIndex((p) => new Date(p.time_end).getTime() > now);
   const nowAverage = averageOf(prices.slice(first, first + quarters));
+  // Grafen visar 24 timmar framåt
+  const upcoming = prices.slice(first, first + 96);
+  const perMil = upcoming.map((p) => evSekPerMil(p.SEK_per_kWh, settings));
 
   const start = prices[best.startIndex];
   const end = prices[best.startIndex + best.length - 1];
@@ -116,6 +120,22 @@ export function EvPlanner({ prices }: { prices: Price[] }) {
           )}
           .
         </p>
+      </section>
+
+      {/* Grafen */}
+      <section
+        aria-label="Kostnad per mil"
+        className="glass mt-3 rounded-[22px] px-3.5 pt-3.5 pb-3"
+      >
+        <EvChart
+          prices={upcoming}
+          values={perMil}
+          fuel={{ label: fuel.label, perMil: fuelPerMil }}
+          highlight={{
+            startIndex: best.startIndex - first,
+            length: best.length,
+          }}
+        />
       </section>
 
       {/* Jämförelsen */}

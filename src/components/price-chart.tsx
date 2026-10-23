@@ -21,7 +21,7 @@ const ore = (sek: number) => (sek * 100).toFixed(1);
 
 // Färgskalan: grönt (billigast) → guld → orange → rött (dyrast).
 // Färgerna ligger som CSS-variabler i globals.css, så de följer temat.
-const SCALE = [
+export const SCALE = [
   { at: 0, color: "var(--scale-0)" },
   { at: 0.45, color: "var(--scale-1)" },
   { at: 0.75, color: "var(--scale-2)" },
@@ -29,7 +29,7 @@ const SCALE = [
 ];
 
 /** Färgen för en nivå mellan 0 (dagens lägsta) och 1 (dagens högsta). */
-function scaleColor(level: number) {
+export function scaleColor(level: number) {
   const p = Math.min(1, Math.max(0, level));
   for (let i = 1; i < SCALE.length; i++) {
     const from = SCALE[i - 1];
