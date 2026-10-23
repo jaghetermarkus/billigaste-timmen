@@ -2,6 +2,7 @@ import { AppNav } from "@/components/app-nav";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
@@ -67,6 +68,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </footer>
           <AppNav />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
