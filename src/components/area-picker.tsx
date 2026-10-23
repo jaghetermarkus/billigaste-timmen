@@ -1,13 +1,14 @@
 "use client";
 
+import { withArea } from "@/components/area-link";
 import { areaCities, areaCookie, areas, type Area } from "@/lib/domain/area";
 import { moodLabels } from "@/lib/domain/mood";
 import type { AreaOverview } from "@/lib/prices/fetch-area-overview";
 import { ChevronDown } from "lucide-react";
 import Link, { useLinkStatus } from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useId, useRef, useState, useTransition } from "react";
-import { hrefFor, type Day } from "./day-tabs";
+import type { Day } from "./day-tabs";
 
 // Förenklad Sverigekarta från designen (viewBox 0 0 200 432)
 const SWEDEN =
@@ -26,13 +27,18 @@ const ore = (sek: number | null) =>
 
 type Props = {
   area: Area;
-  day: Day;
+  day?: Day;
   overview: AreaOverview[];
 };
 
 export function AreaPicker({ area, day, overview }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  /** Samma sida och samma val som nu, bara med ett annat område */
+  const hrefFor = (a: Area) =>
+    withArea(`${pathname}?${searchParams.toString()}`, a);
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, "");
 
   const open = () => dialogRef.current?.showModal();
@@ -43,7 +49,7 @@ export function AreaPicker({ area, day, overview }: Props) {
   const pick = (a: Area) => {
     rememberArea(a);
     setPendingArea(a);
-    startTransition(() => router.push(hrefFor(day, a), { scroll: false }));
+    startTransition(() => router.push(hrefFor(a), { scroll: false }));
   };
   const loadingArea = isPending ? pendingArea : null;
 
@@ -182,7 +188,7 @@ export function AreaPicker({ area, day, overview }: Props) {
                   <li key={o.area} data-mood={o.mood ?? "vanlig"}>
                     <Link
                       onClick={() => rememberArea(o.area)}
-                      href={hrefFor(day, o.area)}
+                      href={hrefFor(o.area)}
                       scroll={false}
                       aria-current={selected ? "true" : undefined}
                       className={`transition-transform duration-100 active:scale-[0.98] flex min-h-14 items-center gap-2.5 rounded-[14px] px-3 py-2 ${

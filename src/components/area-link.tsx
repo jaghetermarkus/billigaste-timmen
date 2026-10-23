@@ -21,7 +21,7 @@ function LinkWithArea({ href, ...rest }: Props) {
 }
 
 /** "/maskiner" + "SE1" blir "/maskiner?omrade=SE1". Behåller annat som redan står i href. */
-function withArea(href: string, area: string) {
+export function withArea(href: string, area: string) {
   const [path, query = ""] = href.split("?");
   const params = new URLSearchParams(query);
   params.set("omrade", area);

@@ -1,6 +1,11 @@
 "use client";
 
-import { ChartColumn, WashingMachine, type LucideIcon } from "lucide-react";
+import {
+  ChartColumn,
+  Clock,
+  WashingMachine,
+  type LucideIcon,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
 import { AreaLink } from "./area-link";
 
@@ -11,7 +16,7 @@ const items: NavItem[] = [
   { href: "/", label: "I dag", icon: ChartColumn },
   { href: "/maskiner", label: "Maskiner", icon: WashingMachine },
   // { href: "/produktion", label: "Produktion", icon: Wind },
-  // { href: "/historik", label: "Historik", icon: History },
+  { href: "/historik", label: "Historik", icon: Clock },
 ];
 
 /** "/maskiner/elbil" ska markera Maskiner, men "/" ska bara markera sig själv. */
