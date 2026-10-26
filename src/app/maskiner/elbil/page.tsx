@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import { areaFromRequest } from "@/lib/area-from-request";
 import { fetchUpcoming } from "@/lib/prices/fetch-upcoming";
 
-export const metadata = { title: "Elbil · Billigaste timmen" };
+export const metadata = { title: "Elbil – kostnad per mil just nu" };
 
 type SearchParams = Promise<{ omrade?: string }>;
 

@@ -239,6 +239,22 @@
   --scale-3: rgb(255 107 107);
 }
 
+/* Kraftslagen på Produktion. Mörkare i ljust tema så att de syns mot den ljusa bakgrunden. */
+:root {
+  --energy-vatten: #1f6fd1;
+  --energy-karn: #6a4fd8;
+  --energy-vind: #0f8f84;
+  --energy-sol: #b98500;
+  --energy-varme: #d0573a;
+}
+.dark {
+  --energy-vatten: #5aa9ff;
+  --energy-karn: #b39cff;
+  --energy-vind: #7fe0d6;
+  --energy-sol: #f2c85b;
+  --energy-varme: #ff9a7a;
+}
+
 /* Skimret ligger på html och täcker därmed hela sidan */
 html {
   min-height: 100lvh;

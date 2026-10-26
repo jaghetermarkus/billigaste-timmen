@@ -19,7 +19,9 @@ import { TZDate } from "@date-fns/tz";
 import { AreaPicker } from "@/components/area-picker";
 import { fetchAreaOverview } from "@/lib/prices/fetch-area-overview";
 
-export const metadata = { title: "Historik · Billigaste timmen" };
+export const metadata = {
+  title: "Historik – elpriset senaste 30 dagarna och året",
+};
 
 type SearchParams = Promise<{ omrade?: string; visa?: string }>;
 

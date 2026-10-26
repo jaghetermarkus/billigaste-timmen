@@ -4,7 +4,7 @@ import { AreaLink } from "@/components/area-link";
 import { EvSettingsForm } from "@/components/ev-settings-form";
 
 export const metadata = {
-  title: "Inställningar för elbilen · Billigaste timmen",
+  title: "Inställningar för elbilen",
 };
 
 export default function EvSettingsPage() {

@@ -4,6 +4,7 @@ import {
   ChartColumn,
   Clock,
   WashingMachine,
+  Wind,
   type LucideIcon,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -15,7 +16,7 @@ type NavItem = { href: string; label: string; icon: LucideIcon };
 const items: NavItem[] = [
   { href: "/", label: "I dag", icon: ChartColumn },
   { href: "/maskiner", label: "Maskiner", icon: WashingMachine },
-  // { href: "/produktion", label: "Produktion", icon: Wind },
+  { href: "/produktion", label: "Produktion", icon: Wind },
   { href: "/historik", label: "Historik", icon: Clock },
 ];
 

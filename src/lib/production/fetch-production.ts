@@ -75,13 +75,14 @@ async function fetchArea(
   end: Date,
 ): Promise<ProductionPoint[]> {
   const period = `periodStart=${entsoeTime(start)}&periodEnd=${entsoeTime(end)}`;
-  // Efter varandra: ENTSO-E:s server avvisar ibland anrop som kommer samtidigt
-  const generation = await fetchEntsoe(
-    `documentType=A75&processType=A16&in_Domain=${areaCodes[area]}&${period}`,
-  );
-  const consumption = await fetchEntsoe(
-    `documentType=A65&processType=A16&outBiddingZone_Domain=${areaCodes[area]}&${period}`,
-  );
+  const [generation, consumption] = await Promise.all([
+    fetchEntsoe(
+      `documentType=A75&processType=A16&in_Domain=${areaCodes[area]}&${period}`,
+    ),
+    fetchEntsoe(
+      `documentType=A65&processType=A16&outBiddingZone_Domain=${areaCodes[area]}&${period}`,
+    ),
+  ]);
   return dropUnsettledConsumption(
     combineSeries(parseGeneration(generation), parseConsumption(consumption)),
   );
@@ -94,8 +95,10 @@ export async function fetchProductionToday(): Promise<ProductionDay | null> {
   const end = addDays(start, 1);
 
   try {
-    // Ett område i taget, så att bara ett anrop pågår åt gången
-    const lists: ProductionPoint[][] = [];
+    // Alla åtta anrop samtidigt, så att det bara tar lika lång tid som det långsammaste
+    const lists = await Promise.all(
+      areas.map((area) => fetchArea(area, start, end)),
+    );
     for (const area of areas) lists.push(await fetchArea(area, start, end));
     const byArea = Object.fromEntries(
       areas.map((area, i) => [area, lists[i]]),

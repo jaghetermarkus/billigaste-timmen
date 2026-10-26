@@ -4,7 +4,7 @@ import { areaFromRequest } from "@/lib/area-from-request";
 import { fetchUpcoming } from "@/lib/prices/fetch-upcoming";
 import { Suspense } from "react";
 
-export const metadata = { title: "Maskiner · Billigaste timmen" };
+export const metadata = { title: "Maskiner" };
 
 type SearchParams = Promise<{ omrade?: string }>;
 
