@@ -99,10 +99,6 @@ export function ProductionMap({ now, sweden, selected }: Props) {
   const totals = Object.fromEntries(
     areas.map((a) => [a, summarizePoint(now[a]).total]),
   ) as Record<Area, number>;
-  const swedenSummary = summarizePoint(sweden);
-  const chipPercents = roundPercents(
-    energyKinds.map((k) => (sweden.mix[k] / (swedenSummary.total || 1)) * 100),
-  );
 
   /** Byter område direkt på skärmen, och sedan i adressen så att Översikt visar samma område. */
   function pick(next: Area) {
@@ -116,6 +112,10 @@ export function ProductionMap({ now, sweden, selected }: Props) {
 
   const card = area ? now[area] : sweden;
   const cardSummary = summarizePoint(card);
+  // Procenten på kraftslagsknapparna gäller valt område, eller hela Sverige
+  const chipPercents = roundPercents(
+    energyKinds.map((k) => (card.mix[k] / (cardSummary.total || 1)) * 100),
+  );
 
   return (
     <div className="flex flex-col gap-3">
