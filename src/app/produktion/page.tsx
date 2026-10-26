@@ -3,6 +3,7 @@ import { TZDate } from "@date-fns/tz";
 import { format } from "date-fns";
 
 import { AreaLink } from "@/components/area-link";
+import { ProductionChart } from "@/components/production-chart";
 import { ProductionMix } from "@/components/production-mix";
 import { areaCities, areas, type Area } from "@/lib/domain/area";
 import {
@@ -66,8 +67,36 @@ async function ProductionSection({
         </p>
       </div>
 
-      {latest ? (
-        <ProductionNow point={latest} />
+      {day && latest ? (
+        <>
+          <ProductionNow point={latest} />
+          <section
+            className="glass mt-3 flex flex-col gap-1.5 rounded-[22px] p-3"
+            aria-labelledby="idag"
+          >
+            <div className="flex items-baseline justify-between px-1">
+              <h2
+                id="idag"
+                className="text-muted-foreground text-[11px] font-semibold tracking-[0.14em] uppercase"
+              >
+                I dag
+              </h2>
+              <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                <span
+                  className="w-[18px] border-t-[1.5px] border-dashed border-current opacity-60"
+                  aria-hidden="true"
+                />
+                förbrukning
+              </span>
+            </div>
+            <ProductionChart
+              key={selected ?? "SE"}
+              points={points}
+              dayStart={day.start}
+              dayEnd={day.end}
+            />
+          </section>
+        </>
       ) : (
         <p className="mt-6">Kunde inte hämta produktionen just nu.</p>
       )}

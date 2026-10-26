@@ -24,6 +24,9 @@ const areaCodes: Record<Area, string> = {
 };
 
 export type ProductionDay = {
+  /** Dygnets start och slut i millisekunder (svensk midnatt till midnatt) */
+  start: number;
+  end: number;
   byArea: Record<Area, ProductionPoint[]>;
   /** Summan av alla fyra områdena */
   sweden: ProductionPoint[];
@@ -103,7 +106,12 @@ export async function fetchProductionToday(): Promise<ProductionDay | null> {
     const byArea = Object.fromEntries(
       areas.map((area, i) => [area, lists[i]]),
     ) as Record<Area, ProductionPoint[]>;
-    return { byArea, sweden: sumAreas(byArea) };
+    return {
+      start: start.getTime(),
+      end: end.getTime(),
+      byArea,
+      sweden: sumAreas(byArea),
+    };
   } catch (error) {
     console.error("Kunde inte hämta produktionen", error);
     return null;
