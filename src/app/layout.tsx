@@ -1,6 +1,7 @@
 import { AppNav } from "@/components/app-nav";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { siteUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
@@ -15,12 +16,25 @@ const fraunces = Fraunces({
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-export const metadata: Metadata = {
-  title: "Billigaste timmen",
-  description:
-    "Billigaste timmen är elspotpriser för el i Sverige. Vi visar dig när elen är billigast och dyrast.",
-};
+const title = "Billigaste timmen – elpriset idag timme för timme";
+const description =
+  "Se elpriset idag och i morgon, timme för timme, i SE1–SE4. Hitta billigaste timmen att ladda elbilen, tvätta och diska.";
 
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  title: { default: title, template: "%s – Billigaste timmen" },
+  description,
+  applicationName: "Billigaste timmen",
+  openGraph: {
+    siteName: "Billigaste timmen",
+    title,
+    description,
+    url: "/",
+    locale: "sv_SE",
+    type: "website",
+  },
+  twitter: { card: "summary_large_image" },
+};
 export const viewport: Viewport = {
   viewportFit: "cover",
   themeColor: [
