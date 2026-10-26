@@ -8,6 +8,8 @@ import {
   expandPeriod,
   kindFromPsrType,
   latestPoint,
+  pointsAt,
+  productionStory,
   resolutionMinutes,
   roundPercents,
   sumAreas,
@@ -209,5 +211,42 @@ describe("dropUnsettledConsumption", () => {
     expect(
       dropUnsettledConsumption(series(values)).map((p) => p.consumption),
     ).toEqual(values);
+  });
+});
+
+describe("pointsAt", () => {
+  it("hämtar samma kvart i alla fyra områdena", () => {
+    const t1 = t0 + QUARTER;
+    const byArea = {
+      SE1: [point(t0, { vatten: 1 }), point(t1, { vatten: 2 })],
+      SE2: [point(t1, { vind: 3 })],
+      SE3: [point(t1, { karn: 4 })],
+      SE4: [point(t1, { sol: 5 })],
+    };
+    expect(pointsAt(byArea, t1)?.SE4.mix.sol).toBe(5);
+    expect(pointsAt(byArea, t0)).toBeNull();
+  });
+});
+
+describe("productionStory", () => {
+  it("nämner de två största kraftslagen och exporten", () => {
+    const story = productionStory(
+      summarizePoint(point(t0, { vatten: 600, vind: 300, varme: 100 }, 800)),
+    );
+    expect(story).toBe(
+      "Mest el kommer från vattenkraft (60 %) och vindkraft (30 %). Det produceras 200 MW mer än som används.",
+    );
+  });
+
+  it("säger import när förbrukningen är större och klarar ett enda kraftslag", () => {
+    expect(productionStory(summarizePoint(point(t0, { karn: 500 }, 900)))).toBe(
+      "Mest el kommer från kärnkraft (100 %). Det används 400 MW mer än som produceras.",
+    );
+  });
+
+  it("hoppar över balansen när förbrukningen saknas", () => {
+    expect(
+      productionStory(summarizePoint(point(t0, { vind: 500 }, null))),
+    ).toBe("Mest el kommer från vindkraft (100 %).");
   });
 });

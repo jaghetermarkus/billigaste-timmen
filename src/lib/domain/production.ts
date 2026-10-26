@@ -243,3 +243,37 @@ export function dropUnsettledConsumption(
   }
   return points;
 }
+
+/** Varje områdes kvart vid en viss tid, eller null om något område saknar just den kvarten. */
+export function pointsAt(
+  byArea: Record<Area, ProductionPoint[]>,
+  time: number,
+): Record<Area, ProductionPoint> | null {
+  const result = {} as Record<Area, ProductionPoint>;
+  for (const area of areas) {
+    const point = byArea[area].find((p) => p.time === time);
+    if (!point) return null;
+    result[area] = point;
+  }
+  return result;
+}
+
+/**
+ * Två meningar till kortet under kartan, till exempel
+ * "Mest el kommer från vattenkraft (60 %) och vindkraft (30 %). Det produceras 200 MW mer än som används."
+ */
+export function productionStory(s: ProductionSummary): string {
+  const percents = roundPercents(s.shares.map((x) => x.percent));
+  const parts = s.shares
+    .slice(0, 2)
+    .map((x, i) => `${energyNames[x.kind].long} (${percents[i]} %)`);
+  const mix =
+    parts.length === 0
+      ? "Ingen produktion just nu."
+      : `Mest el kommer från ${parts.join(" och ")}.`;
+  if (s.net === null) return mix;
+  const mw = Math.round(Math.abs(s.net)).toLocaleString("sv-SE");
+  return s.net >= 0
+    ? `${mix} Det produceras ${mw} MW mer än som används.`
+    : `${mix} Det används ${mw} MW mer än som produceras.`;
+}
