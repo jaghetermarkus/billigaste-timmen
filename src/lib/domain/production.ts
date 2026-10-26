@@ -218,3 +218,28 @@ export function roundPercents(values: number[]): number[] {
   }
   return floors;
 }
+
+/**
+ * De senaste kvartarnas förbrukning från ENTSO-E är ibland preliminär och nästan lika stor som
+ * produktionen, troligen för att utlandshandeln inte är inräknad än. I SE2 kunde den hoppa från
+ * 1 500 till 6 400 MW mellan två kvartar. Riktig förbrukning ändras aldrig så snabbt.
+ *
+ * Funktionen letar efter ett sådant hopp bland de sista kvartarna och tar bort förbrukningen
+ * därifrån och framåt. Då väljer latestPoint en tidigare kvart med en pålitlig siffra.
+ */
+export function dropUnsettledConsumption(
+  points: ProductionPoint[],
+  maxJump = 0.15,
+  window = 8,
+): ProductionPoint[] {
+  const from = Math.max(1, points.length - window);
+  for (let i = from; i < points.length; i++) {
+    const before = points[i - 1].consumption;
+    const now = points[i].consumption;
+    if (before === null || now === null || before === 0) continue;
+    if (Math.abs(now - before) / before > maxJump) {
+      return points.map((p, j) => (j >= i ? { ...p, consumption: null } : p));
+    }
+  }
+  return points;
+}

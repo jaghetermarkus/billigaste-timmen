@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   QUARTER,
   combineSeries,
+  dropUnsettledConsumption,
   emptyMix,
   expandPeriod,
   kindFromPsrType,
@@ -174,5 +175,39 @@ describe("roundPercents", () => {
     expect(roundPercents([35.5, 28.4, 30.1, 1.6, 4.4])).toEqual([
       36, 28, 30, 2, 4,
     ]);
+  });
+});
+
+describe("dropUnsettledConsumption", () => {
+  const series = (values: (number | null)[]) =>
+    values.map((c, i) => point(t0 + i * QUARTER, { vatten: 6300 }, c));
+
+  it("tar bort förbrukningen från ett plötsligt hopp och framåt", () => {
+    const result = dropUnsettledConsumption(
+      series([1600, 1700, 1600, 1465, 6386, 6371, 6376]),
+    );
+    expect(result.map((p) => p.consumption)).toEqual([
+      1600,
+      1700,
+      1600,
+      1465,
+      null,
+      null,
+      null,
+    ]);
+  });
+
+  it("låter vanliga ändringar vara", () => {
+    const values = [10000, 10400, 10800, 10500, 10100];
+    expect(
+      dropUnsettledConsumption(series(values)).map((p) => p.consumption),
+    ).toEqual(values);
+  });
+
+  it("tittar bara på de sista kvartarna", () => {
+    const values = [1000, 2000, ...Array(10).fill(2000)];
+    expect(
+      dropUnsettledConsumption(series(values)).map((p) => p.consumption),
+    ).toEqual(values);
   });
 });
